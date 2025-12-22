@@ -86,3 +86,30 @@ The backend requires a PostgreSQL database and a Redis instance, which are orche
 - **Social Feed**: Post updates and view feeds.
 - **Modern UI**: Responsive design with TailwindCSS.
 - **Robust Backend**: Type-safe database interactions with Prisma.
+
+## Database Management
+
+To facilitate sharing the database state between users, we have provided helper scripts in the `bento-social-be` directory.
+
+### Export Database
+
+To export the current database state to a `backup.sql` file:
+
+```bash
+cd bento-social-be
+./export_db.sh
+```
+
+This will create a `backup.sql` file in the `bento-social-be` directory.
+
+### Import Database
+
+To import a database from a `backup.sql` file:
+
+1.  Place the `backup.sql` file in the `bento-social-be` directory.
+2.  Run the import script:
+    ```bash
+    cd bento-social-be
+    ./import_db.sh
+    ```
+    _Note: This will overwrite the existing data in the `bento-social` database._
