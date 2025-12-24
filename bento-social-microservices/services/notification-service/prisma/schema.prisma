@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Notification {
+  id         String             @id @map("id") @db.VarChar(36)
+  receiverId String             @map("receiver_id") @db.VarChar(36)
+  actorId    String?            @map("actor_id") @db.VarChar(36)
+  content    String?            @map("content") @db.Text
+  action     NotificationAction @map("action")
+  isSent     Boolean?           @default(false) @map("is_sent")
+  isRead     Boolean?           @default(false) @map("is_read")
+  createdAt  DateTime           @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime?          @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([receiverId], map: "notification_receiver_idx")
+  @@map("notifications")
+}
+
+enum NotificationAction {
+  liked
+  followed
+  replied
+}
+
