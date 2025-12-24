@@ -1,0 +1,62 @@
+version: "3.8"
+
+# Development override - Only infrastructure services
+# Services are run locally with pnpm for hot-reload
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bento-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-bento}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-bento_secret}
+      POSTGRES_DB: ${DB_NAME:-bento_social}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bento-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bento} -d ${DB_NAME:-bento_social}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: bento-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-bento_redis}
+    volumes:
+      - redis_data:/data
+    networks:
+      - bento-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-bento_redis}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer:latest
+    container_name: bento-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - bento-network
+    depends_on:
+      - postgres
+
+networks:
+  bento-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+

@@ -1,0 +1,29 @@
+{
+  "name": "bento-social-microservices",
+  "version": "1.0.0",
+  "description": "Bento Social - Microservices Architecture",
+  "private": true,
+  "scripts": {
+    "build": "pnpm -r build",
+    "build:shared": "pnpm --filter @bento/shared build",
+    "dev:gateway": "pnpm --filter api-gateway start:dev",
+    "dev:auth": "pnpm --filter auth-service start:dev",
+    "dev:user": "pnpm --filter user-service start:dev",
+    "dev:post": "pnpm --filter post-service start:dev",
+    "dev:topic": "pnpm --filter topic-service start:dev",
+    "dev:comment": "pnpm --filter comment-service start:dev",
+    "dev:notification": "pnpm --filter notification-service start:dev",
+    "dev:interaction": "pnpm --filter interaction-service start:dev",
+    "dev:upload": "pnpm --filter upload-service start:dev",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "keywords": ["nestjs", "microservices", "social-network"],
+  "author": "Bento Team",
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.2"
+}
+
