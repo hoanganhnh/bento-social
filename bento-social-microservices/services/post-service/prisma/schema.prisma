@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Post {
+  id           String    @id @map("id") @db.VarChar(36)
+  content      String    @map("content") @db.Text
+  image        String?   @map("image") @db.VarChar(255)
+  authorId     String    @map("author_id") @db.VarChar(36)
+  topicId      String    @map("topic_id") @db.VarChar(36)
+  isFeatured   Boolean?  @default(false) @map("is_featured")
+  commentCount Int?      @default(0) @map("comment_count") @db.Integer
+  likedCount   Int?      @default(0) @map("liked_count") @db.Integer
+  type         PostType? @default(text) @map("type")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([authorId], map: "authorIdIdx")
+  @@index([topicId], map: "topicIdIdx")
+  @@index([isFeatured], map: "isFeaturedIdx")
+  @@map("posts")
+}
+
+enum PostType {
+  text
+  media
+}
+

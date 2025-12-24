@@ -18,7 +18,7 @@ export class UserRpcClient extends BaseRpcClient implements IAuthorRpc {
   async findByIds(ids: string[]): Promise<PublicUser[]> {
     if (ids.length === 0) return [];
     try {
-      return await this.post<PublicUser[]>('/rpc/users/list-by-ids', { ids });
+      return await this.post<PublicUser[]>('/rpc/users/by-ids', { ids });
     } catch {
       return [];
     }
