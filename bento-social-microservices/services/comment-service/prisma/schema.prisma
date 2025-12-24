@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Comment {
+  id         String        @id @map("id") @db.VarChar(36)
+  userId     String        @map("user_id") @db.VarChar(36)
+  postId     String        @map("post_id") @db.VarChar(36)
+  parentId   String?       @map("parent_id") @db.VarChar(36)
+  content    String        @map("content") @db.Text
+  likedCount Int           @default(0) @map("liked_count") @db.Integer
+  replyCount Int           @default(0) @map("reply_count") @db.Integer
+  status     CommentStatus @default(approved) @map("status")
+  createdAt  DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt  DateTime?     @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([postId], map: "comment_post_idx")
+  @@index([parentId], map: "comment_parent_idx")
+  @@index([userId], map: "comment_user_idx")
+  @@map("comments")
+}
+
+enum CommentStatus {
+  pending
+  approved
+  rejected
+  deleted
+  spam
+}
+
