@@ -1,0 +1,3 @@
+export const POST_SERVICE = 'POST_SERVICE';
+export const POST_REPOSITORY = 'POST_REPOSITORY';
+export const TOPIC_QUERY = 'TOPIC_QUERY';

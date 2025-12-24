@@ -31,4 +31,7 @@ export interface IUserRepository {
   insert(user: User): Promise<void>;
   update(id: string, dto: UserUpdateDTO): Promise<void>;
   delete(id: string, isHard: boolean): Promise<void>;
+  // Count operations for event sync
+  increaseCount(id: string, field: string, step: number): Promise<void>;
+  decreaseCount(id: string, field: string, step: number): Promise<void>;
 }

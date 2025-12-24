@@ -1,0 +1,2 @@
+export const TOPIC_SERVICE = 'TOPIC_SERVICE';
+export const TOPIC_REPOSITORY = 'TOPIC_REPOSITORY';

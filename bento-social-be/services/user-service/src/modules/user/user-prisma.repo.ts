@@ -98,6 +98,20 @@ export class UserPrismaRepository implements IUserRepository {
     }
   }
 
+  async increaseCount(id: string, field: string, step: number): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { [field]: { increment: step } },
+    });
+  }
+
+  async decreaseCount(id: string, field: string, step: number): Promise<void> {
+    await prisma.user.update({
+      where: { id },
+      data: { [field]: { decrement: step } },
+    });
+  }
+
   private _toModel(data: UserPrisma): User {
     return { ...data, role: data.role as UserRole } as User;
   }
