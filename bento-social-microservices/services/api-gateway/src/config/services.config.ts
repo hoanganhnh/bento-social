@@ -38,9 +38,11 @@ export const ROUTE_MAPPINGS: RouteMapping[] = [
   { path: '/v1/rpc/introspect', service: 'AUTH', targetPath: '/rpc/introspect' },
 
   // ============ USER SERVICE ============
-  { path: '/v1/users-suggested', service: 'USER', targetPath: '/users-suggested' },
+  { path: '/v1/users-suggested', service: 'USER', targetPath: '/users/suggested' },
   { path: '/v1/users/:id', service: 'USER', targetPath: '/users/:id' },
-  { path: '/v1/rpc/users', service: 'USER', targetPath: '/rpc/users' },
+  { path: '/v1/rpc/users/by-ids', service: 'USER', targetPath: '/rpc/users/by-ids' },
+  { path: '/v1/rpc/users/find', service: 'USER', targetPath: '/rpc/users/find' },
+  { path: '/v1/rpc/users/:id', service: 'USER', targetPath: '/rpc/users/:id' },
 
   // ============ POST SERVICE ============
   { path: '/v1/posts/rpc', service: 'POST', targetPath: '/posts/rpc' },

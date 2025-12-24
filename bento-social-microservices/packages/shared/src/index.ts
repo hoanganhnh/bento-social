@@ -10,6 +10,9 @@ export * from './interfaces';
 // Guards
 export * from './guards';
 
+// Decorators
+export * from './decorators';
+
 // RPC Clients
 export * from './rpc';
 

@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String     @id @map("id") @db.VarChar(36)
+  cover         String?    @map("cover") @db.VarChar(255)
+  avatar        String?    @map("avatar") @db.VarChar(255)
+  username      String     @unique @map("username") @db.VarChar(100)
+  firstName     String     @map("first_name") @db.VarChar(100)
+  lastName      String     @map("last_name") @db.VarChar(100)
+  password      String     @map("password") @db.VarChar(100)
+  salt          String     @map("salt") @db.VarChar(50)
+  role          UserRole   @default(user) @map("role")
+  bio           String?    @map("bio") @db.VarChar(255)
+  websiteUrl    String?    @map("website_url") @db.VarChar(255)
+  followerCount Int?       @default(0) @map("follower_count") @db.Integer
+  postCount     Int?       @default(0) @map("post_count") @db.Integer
+  status        UserStatus @default(active) @map("status")
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime   @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([role], map: "role")
+  @@index([status], map: "status")
+  @@map("users")
+}
+
+model Follower {
+  followerId  String   @map("follower_id") @db.VarChar(36)
+  followingId String   @map("following_id") @db.VarChar(36)
+  createdAt   DateTime @map("created_at") @db.Timestamp(3)
+
+  @@id([followingId, followerId])
+  @@index([followerId], map: "followerIdIdx")
+  @@map("followers")
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+enum UserStatus {
+  active
+  pending
+  inactive
+  banned
+  deleted
+}
+
