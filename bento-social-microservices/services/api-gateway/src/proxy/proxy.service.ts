@@ -2,6 +2,7 @@ import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/c
 import { HttpService } from '@nestjs/axios';
 import { AxiosRequestConfig, AxiosError } from 'axios';
 import { firstValueFrom } from 'rxjs';
+import * as FormData from 'form-data';
 import {
   SERVICES_CONFIG,
   IServicesConfig,
@@ -16,6 +17,7 @@ export interface ProxyRequest {
   query?: Record<string, any>;
   headers: Record<string, string>;
   params?: Record<string, string>;
+  rawRequest?: any; // Original express request for streaming
 }
 
 export interface ProxyResponse {
@@ -128,6 +130,14 @@ export class ProxyService {
   }
 
   /**
+   * Check if request is multipart/form-data
+   */
+  isMultipart(headers: Record<string, string>): boolean {
+    const contentType = headers['content-type'] || '';
+    return contentType.includes('multipart/form-data');
+  }
+
+  /**
    * Proxy request to target service
    */
   async proxy(request: ProxyRequest): Promise<ProxyResponse> {
@@ -155,6 +165,11 @@ export class ProxyService {
       `Proxying ${request.method} ${request.path} -> ${targetUrl}`,
     );
 
+    // Handle multipart/form-data requests by streaming the raw request
+    if (this.isMultipart(request.headers) && request.rawRequest) {
+      return this.proxyMultipart(request, targetUrl);
+    }
+
     const config: AxiosRequestConfig = {
       method: request.method as any,
       url: targetUrl,
@@ -178,6 +193,48 @@ export class ProxyService {
         
         this.logger.error(
           `Proxy error for ${request.method} ${targetUrl}: ${error.message}`,
+        );
+
+        throw new HttpException(data, status);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Proxy multipart/form-data request by streaming the raw request
+   */
+  private async proxyMultipart(request: ProxyRequest, targetUrl: string): Promise<ProxyResponse> {
+    const req = request.rawRequest;
+    
+    const config: AxiosRequestConfig = {
+      method: request.method as any,
+      url: targetUrl,
+      headers: {
+        ...this.filterHeaders(request.headers),
+        'content-type': request.headers['content-type'],
+        'content-length': request.headers['content-length'],
+      },
+      data: req, // Stream the raw request
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    };
+
+    try {
+      const response = await firstValueFrom(this.httpService.request(config));
+      
+      return {
+        status: response.status,
+        data: response.data,
+        headers: response.headers as Record<string, any>,
+      };
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const status = error.response?.status || HttpStatus.BAD_GATEWAY;
+        const data = error.response?.data || { message: error.message };
+        
+        this.logger.error(
+          `Multipart proxy error for ${request.method} ${targetUrl}: ${error.message}`,
         );
 
         throw new HttpException(data, status);

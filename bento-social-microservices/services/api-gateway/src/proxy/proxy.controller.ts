@@ -19,12 +19,16 @@ export class ProxyController {
     const startTime = Date.now();
 
     try {
+      // Check if this is a multipart request (file upload)
+      const isMultipart = (req.headers['content-type'] || '').includes('multipart/form-data');
+      
       const response = await this.proxyService.proxy({
         method: req.method,
         path: req.path,
         body: req.body,
         query: req.query as Record<string, any>,
         headers: req.headers as Record<string, string>,
+        rawRequest: isMultipart ? req : undefined, // Pass raw request for multipart
       });
 
       const duration = Date.now() - startTime;
