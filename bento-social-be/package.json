@@ -1,8 +1,8 @@
 {
   "name": "bento-nestjs",
   "version": "0.0.1",
-  "description": "Bento NestJS - A very simple social network showcase of 200Lab.io",
-  "author": "200Lab.io",
+  "description": "Bento NestJS - A very simple social network showcase of ptit",
+  "author": "ptit",
   "private": true,
   "license": "MIT",
   "scripts": {

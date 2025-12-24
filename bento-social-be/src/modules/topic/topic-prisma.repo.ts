@@ -1,10 +1,10 @@
-import { TopicCondDTO } from "./topic.model";
+import { TopicCondDTO } from './topic.model';
 
-import { Injectable } from "@nestjs/common";
-import prisma from "src/share/components/prisma";
-import { Paginated, PagingDTO } from "src/share/data-model";
-import { Topic, TopicUpdateDTO } from "./topic.model";
-import { ITopicRepository } from "./topic.port";
+import { Injectable } from '@nestjs/common';
+import prisma from 'src/share/components/prisma';
+import { Paginated, PagingDTO } from 'src/share/data-model';
+import { Topic, TopicUpdateDTO } from './topic.model';
+import { ITopicRepository } from './topic.port';
 
 @Injectable()
 export class TopicPrismaRepository implements ITopicRepository {
@@ -30,7 +30,10 @@ export class TopicPrismaRepository implements ITopicRepository {
     return topic as Topic;
   }
 
-  async list(condition: TopicCondDTO, paging: PagingDTO): Promise<Paginated<Topic>> {
+  async list(
+    condition: TopicCondDTO,
+    paging: PagingDTO,
+  ): Promise<Paginated<Topic>> {
     const skip = (paging.page - 1) * paging.limit;
 
     const total = await prisma.topic.count({ where: condition });
@@ -40,43 +43,50 @@ export class TopicPrismaRepository implements ITopicRepository {
       take: paging.limit,
       skip,
       orderBy: {
-        id: 'desc'
-      }
+        id: 'desc',
+      },
     });
 
     return {
       data: data as Topic[],
       paging,
-      total
+      total,
     };
   }
 
-  async increaseTopicCount(id: string, field: string, step: number): Promise<void> {
+  async increaseTopicCount(
+    id: string,
+    field: string,
+    step: number,
+  ): Promise<void> {
     await prisma.topic.update({
       where: {
-        id
+        id,
       },
       data: {
         [field]: {
-          increment: step
-        }
-      }
+          increment: step,
+        },
+      },
     });
   }
 
-  async decreaseTopicCount(id: string, field: string, step: number): Promise<void> {
+  async decreaseTopicCount(
+    id: string,
+    field: string,
+    step: number,
+  ): Promise<void> {
     await prisma.topic.update({
       where: {
-        id
+        id,
       },
       data: {
         [field]: {
-          decrement: step
-        }
-      }
-
+          decrement: step,
+        },
+      },
     });
-  };
+  }
 
   async findByIds(ids: string[]): Promise<Topic[]> {
     const topics = await prisma.topic.findMany({ where: { id: { in: ids } } });

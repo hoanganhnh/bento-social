@@ -11,8 +11,6 @@ import { relativeTime } from '@/utils/relative-time';
 
 import { Avatar } from '../avatar';
 
-//--------------------------------------------------------------------------------------------------------
-
 interface TrendingPostCardProps {
   className?: string;
   content: string;
@@ -79,11 +77,11 @@ export default function TrendingPostCard({
               <div
                 className="p-1 rounded-full"
                 style={{
-                  backgroundColor: `${topic.color ? topic.color : '#ffffff'}`,
+                  backgroundColor: `${topic?.color ? topic.color : '#ffffff'}`,
                 }}
               ></div>
               <Typography level="captionr" className="text-tertiary">
-                {topic.name}
+                {topic?.name}
               </Typography>
             </div>
           )}

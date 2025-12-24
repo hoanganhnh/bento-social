@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import jwt from 'jsonwebtoken';
-import { ITokenProvider, TokenPayload } from "../interface";
+import { Injectable } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
+import { ITokenProvider, TokenPayload } from '../interface';
 
 @Injectable()
 export class JwtTokenService implements ITokenProvider {
@@ -21,6 +21,7 @@ export class JwtTokenService implements ITokenProvider {
       const decoded = jwt.verify(token, this.secretKey) as TokenPayload;
       return decoded;
     } catch (error) {
+      console.log(error);
       return null;
     }
   }

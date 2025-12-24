@@ -59,7 +59,7 @@ export default function UpdatePost({
   React.useEffect(() => {
     if (post) {
       setContent(post.content);
-      setSelectedTopic(post.topic.id);
+      setSelectedTopic(post.topic?.id);
       if (post.image) {
         setPreviewUrl(post.image);
         setUploadedImage(post.image);
