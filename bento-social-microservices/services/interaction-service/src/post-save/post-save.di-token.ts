@@ -1,0 +1,4 @@
+export const POST_SAVE_REPOSITORY = Symbol('POST_SAVE_REPOSITORY');
+export const POST_SAVE_SERVICE = Symbol('POST_SAVE_SERVICE');
+
+
