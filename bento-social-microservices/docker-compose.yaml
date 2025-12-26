@@ -44,7 +44,7 @@ services:
     container_name: bento-rabbitmq
     restart: unless-stopped
     ports:
-      - "5672:5672"   # AMQP port
+      - "5672:5672" # AMQP port
       - "15672:15672" # Management UI
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-bento}
@@ -77,15 +77,15 @@ services:
     container_name: bento-jaeger
     restart: unless-stopped
     ports:
-      - "5775:5775/udp"   # Agent - accept zipkin.thrift over compact thrift protocol
-      - "6831:6831/udp"   # Agent - accept jaeger.thrift over compact thrift protocol
-      - "6832:6832/udp"   # Agent - accept jaeger.thrift over binary thrift protocol
-      - "5778:5778"       # Agent - serve configs
-      - "16686:16686"     # Query - UI
-      - "14268:14268"     # Collector - accept jaeger.thrift directly from clients
-      - "14250:14250"     # Collector - accept model.proto
-      - "4317:4317"       # OTLP gRPC
-      - "4318:4318"       # OTLP HTTP
+      - "5775:5775/udp" # Agent - accept zipkin.thrift over compact thrift protocol
+      - "6831:6831/udp" # Agent - accept jaeger.thrift over compact thrift protocol
+      - "6832:6832/udp" # Agent - accept jaeger.thrift over binary thrift protocol
+      - "5778:5778" # Agent - serve configs
+      - "16686:16686" # Query - UI
+      - "14268:14268" # Collector - accept jaeger.thrift directly from clients
+      - "14250:14250" # Collector - accept model.proto
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     networks:
@@ -97,16 +97,16 @@ services:
     container_name: bento-prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "9094:9090"
     volumes:
       - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
     networks:
       - bento-network
 
@@ -166,8 +166,8 @@ services:
     container_name: bento-auth
     restart: unless-stopped
     ports:
-      - "3001:3001"      # HTTP
-      - "50052:50052"    # gRPC
+      - "3001:3001" # HTTP
+      - "50052:50052" # gRPC
     environment:
       - NODE_ENV=development
       - PORT=3001
@@ -191,8 +191,8 @@ services:
     container_name: bento-user
     restart: unless-stopped
     ports:
-      - "3002:3002"      # HTTP
-      - "50051:50051"    # gRPC
+      - "3002:3002" # HTTP
+      - "50051:50051" # gRPC
     environment:
       - NODE_ENV=development
       - PORT=3002
@@ -241,8 +241,8 @@ services:
     container_name: bento-topic
     restart: unless-stopped
     ports:
-      - "3004:3004"      # HTTP
-      - "50053:50053"    # gRPC
+      - "3004:3004" # HTTP
+      - "50053:50053" # gRPC
     environment:
       - NODE_ENV=development
       - PORT=3004
@@ -335,8 +335,8 @@ services:
     container_name: bento-interaction
     restart: unless-stopped
     ports:
-      - "3008:3008"      # HTTP
-      - "50054:50054"    # gRPC
+      - "3008:3008" # HTTP
+      - "50054:50054" # gRPC
     environment:
       - NODE_ENV=development
       - PORT=3008
@@ -365,4 +365,3 @@ volumes:
   uploads_data:
   prometheus_data:
   grafana_data:
-

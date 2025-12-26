@@ -71,7 +71,7 @@ pnpm dev:gateway
 # Terminal 2: Auth Service
 pnpm dev:auth
 
-# Terminal 3: User Service  
+# Terminal 3: User Service
 pnpm dev:user
 
 # Terminal 4: Post Service
@@ -210,7 +210,7 @@ open http://localhost:8080
 
 # Connection:
 # Server: postgres
-# Username: bento  
+# Username: bento
 # Password: bento_secret
 # Database: auth_db (or user_db, post_db, etc.)
 ```
@@ -227,18 +227,21 @@ open http://localhost:15672
 ### Common Issues
 
 **Port already in use:**
+
 ```bash
 lsof -i :3000
 kill -9 <PID>
 ```
 
 **Database connection error:**
+
 ```bash
 docker compose restart postgres
 docker compose logs postgres
 ```
 
 **Service not starting:**
+
 ```bash
 docker compose logs <service-name>
 # Check for errors in logs
@@ -257,7 +260,7 @@ docker compose up -d jaeger prometheus grafana
 ### Access UIs
 
 - **Jaeger**: http://localhost:16686 (Tracing)
-- **Prometheus**: http://localhost:9090 (Metrics)
+- **Prometheus**: http://localhost:9094 (Metrics)
 - **Grafana**: http://localhost:3030 (Dashboards)
   - Login: `admin` / `admin`
 
@@ -265,7 +268,7 @@ docker compose up -d jaeger prometheus grafana
 
 ```bash
 # Query Prometheus
-curl "http://localhost:9090/api/v1/query?query=bento_http_requests_total"
+curl "http://localhost:9094/api/v1/query?query=bento_http_requests_total"
 
 # View traces in Jaeger UI after making API calls
 ```
@@ -311,4 +314,3 @@ npx prisma generate              # Generate Prisma Client
 ---
 
 **Need Help?** Check [ARCHITECTURE_REVIEW.md](./ARCHITECTURE_REVIEW.md) for detailed troubleshooting.
-
