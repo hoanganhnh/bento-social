@@ -76,3 +76,4 @@ function extractTokenFromHeader(request: Request): string | undefined {
   return type === 'Bearer' ? token : undefined;
 }
 
+

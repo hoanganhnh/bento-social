@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package interaction;
+
+service InteractionService {
+  rpc HasLiked (HasLikedRequest) returns (HasLikedResponse);
+  rpc ListPostIdsLiked (ListPostIdsLikedRequest) returns (ListPostIdsLikedResponse);
+  rpc HasSaved (HasSavedRequest) returns (HasSavedResponse);
+  rpc ListPostIdsSaved (ListPostIdsSavedRequest) returns (ListPostIdsSavedResponse);
+}
+
+message HasLikedRequest {
+  string userId = 1;
+  string postId = 2;
+}
+
+message HasLikedResponse {
+  bool liked = 1;
+}
+
+message ListPostIdsLikedRequest {
+  string userId = 1;
+  repeated string postIds = 2;
+}
+
+message ListPostIdsLikedResponse {
+  repeated string postIds = 1;
+}
+
+message HasSavedRequest {
+  string userId = 1;
+  string postId = 2;
+}
+
+message HasSavedResponse {
+  bool saved = 1;
+}
+
+message ListPostIdsSavedRequest {
+  string userId = 1;
+  repeated string postIds = 2;
+}
+
+message ListPostIdsSavedResponse {
+  repeated string postIds = 1;
+}

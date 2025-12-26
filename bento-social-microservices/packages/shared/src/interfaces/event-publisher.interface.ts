@@ -10,3 +10,4 @@ export interface IEventSubscriber {
 
 export interface IEventBus extends IEventPublisher, IEventSubscriber {}
 
+

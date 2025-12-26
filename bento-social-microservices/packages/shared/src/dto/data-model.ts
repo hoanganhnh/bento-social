@@ -56,3 +56,4 @@ export const postSchema = z.object({
 
 export interface Post extends z.infer<typeof postSchema> {}
 
+

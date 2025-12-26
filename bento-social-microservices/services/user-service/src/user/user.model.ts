@@ -37,3 +37,4 @@ export interface User extends z.infer<typeof userSchema> {}
 
 export type PublicUser = Omit<User, 'password' | 'salt'>;
 
+

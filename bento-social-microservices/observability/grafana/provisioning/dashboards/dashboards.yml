@@ -1,0 +1,14 @@
+# Grafana Dashboards Provisioning
+apiVersion: 1
+
+providers:
+  - name: 'Bento Social Dashboards'
+    orgId: 1
+    folder: 'Bento Social'
+    folderUid: 'bento-social'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+

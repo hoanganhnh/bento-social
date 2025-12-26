@@ -25,3 +25,4 @@ export class TopicRpcClient extends BaseRpcClient implements ITopicRpc {
   }
 }
 
+

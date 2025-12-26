@@ -32,3 +32,4 @@ export const ErrBadRequest = new Error('Bad request');
 export const ErrInternalServer = new Error('Internal server error');
 export const ErrTokenInvalid = new Error('Token is invalid');
 
+

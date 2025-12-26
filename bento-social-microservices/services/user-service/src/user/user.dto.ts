@@ -27,3 +27,4 @@ export const userCondDTOSchema = z.object({
 
 export interface UserCondDTO extends z.infer<typeof userCondDTOSchema> {}
 
+

@@ -6,58 +6,138 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ProxyService } from './proxy.service';
+import { createProxyMiddleware, Options } from 'http-proxy-middleware';
+import { SERVICE_TARGETS, PROXY_ROUTES, RouteConfig } from '../config/proxy.config';
 
 @Controller('v1')
 export class ProxyController {
   private readonly logger = new Logger(ProxyController.name);
 
-  constructor(private readonly proxyService: ProxyService) {}
-
   @All('*')
   async proxyRequest(@Req() req: Request, @Res() res: Response) {
     const startTime = Date.now();
+    // req.path already contains the full path including /v1
+    const fullPath = req.path;
 
-    try {
-      // Check if this is a multipart request (file upload)
-      const isMultipart = (req.headers['content-type'] || '').includes('multipart/form-data');
-      
-      const response = await this.proxyService.proxy({
-        method: req.method,
-        path: req.path,
-        body: req.body,
-        query: req.query as Record<string, any>,
-        headers: req.headers as Record<string, string>,
-        rawRequest: isMultipart ? req : undefined, // Pass raw request for multipart
-      });
+    // Find matching route
+    const route = this.findMatchingRoute(fullPath);
 
+    if (!route) {
       const duration = Date.now() - startTime;
-      this.logger.log(
-        `${req.method} ${req.path} -> ${response.status} (${duration}ms)`,
-      );
+      this.logger.warn(`No route found for ${req.method} ${fullPath} (${duration}ms)`);
+      return res.status(404).json({
+        statusCode: 404,
+        message: `Route not found: ${fullPath}`,
+        error: 'Not Found',
+      });
+    }
 
-      // Forward response headers
-      const headersToForward = ['content-type', 'x-request-id'];
-      for (const header of headersToForward) {
-        if (response.headers[header]) {
-          res.setHeader(header, response.headers[header]);
-        }
+    const service = SERVICE_TARGETS[route.service];
+    if (!service) {
+      this.logger.error(`Unknown service: ${route.service}`);
+      return res.status(500).json({
+        statusCode: 500,
+        message: 'Service configuration error',
+        error: 'Internal Server Error',
+      });
+    }
+
+    // Create proxy options
+    const options: Options = {
+      target: service.url,
+      changeOrigin: true,
+      timeout: route.timeout || 30000,
+      proxyTimeout: route.timeout || 30000,
+      pathRewrite: route.pathRewrite,
+      on: {
+        proxyReq: (proxyReq, req: any) => {
+          (req as any).__proxyStartTime = startTime;
+
+          // Forward relevant headers
+          const forwardHeaders = ['authorization', 'x-request-id', 'x-correlation-id', 'content-type'];
+          forwardHeaders.forEach((header) => {
+            const value = req.headers[header];
+            if (value && typeof value === 'string') {
+              proxyReq.setHeader(header, value);
+            }
+          });
+
+          this.logger.debug(`→ ${req.method} ${fullPath} -> ${service.url}${proxyReq.path}`);
+        },
+        proxyRes: (proxyRes, req: any) => {
+          const duration = Date.now() - ((req as any).__proxyStartTime || startTime);
+          this.logger.log(`${req.method} ${fullPath} -> ${proxyRes.statusCode} (${duration}ms) [${service.name}]`);
+
+          // Add service identifier header
+          proxyRes.headers['x-served-by'] = service.name;
+        },
+        error: (err, req: any, res: any) => {
+          const duration = Date.now() - ((req as any).__proxyStartTime || startTime);
+          this.logger.error(`${req.method} ${fullPath} -> ERROR (${duration}ms): ${err.message}`);
+
+          if (res && !res.headersSent) {
+            res.writeHead(502, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              statusCode: 502,
+              message: 'Service unavailable',
+              error: 'Bad Gateway',
+              service: service.name,
+            }));
+          }
+        },
+      },
+    };
+
+    // Create and execute proxy
+    const proxy = createProxyMiddleware(options);
+    return new Promise<void>((resolve) => {
+      proxy(req, res, () => resolve());
+    });
+  }
+
+  /**
+   * Match route pattern to request path
+   */
+  private matchRoute(path: string, pattern: string): boolean {
+    const pathParts = path.split('/').filter(Boolean);
+    const patternParts = pattern.split('/').filter(Boolean);
+
+    if (pathParts.length < patternParts.length) {
+      return false;
+    }
+
+    for (let i = 0; i < patternParts.length; i++) {
+      const patternPart = patternParts[i];
+      const pathPart = pathParts[i];
+
+      // Skip parameter parts (e.g., :id)
+      if (patternPart.startsWith(':')) {
+        continue;
       }
 
-      res.status(response.status).json(response.data);
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-      const status = error.status || error.response?.status || 500;
-      const message = error.response?.data || error.message || 'Internal Server Error';
-
-      this.logger.error(
-        `${req.method} ${req.path} -> ${status} (${duration}ms): ${JSON.stringify(message)}`,
-      );
-
-      res.status(status).json(
-        typeof message === 'object' ? message : { message },
-      );
+      if (patternPart !== pathPart) {
+        return false;
+      }
     }
+
+    return true;
+  }
+
+  /**
+   * Find the best matching route for a given path
+   */
+  private findMatchingRoute(path: string): RouteConfig | null {
+    // Sort routes by specificity (longer paths first)
+    const sortedRoutes = [...PROXY_ROUTES].sort(
+      (a, b) => b.path.length - a.path.length
+    );
+
+    for (const route of sortedRoutes) {
+      if (this.matchRoute(path, route.path)) {
+        return route;
+      }
+    }
+
+    return null;
   }
 }
-

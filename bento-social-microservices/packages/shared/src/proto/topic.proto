@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package topic;
+
+service TopicService {
+  rpc FindById (FindByIdRequest) returns (TopicResponse);
+  rpc FindByIds (FindByIdsRequest) returns (TopicsResponse);
+}
+
+message FindByIdRequest {
+  string id = 1;
+}
+
+message FindByIdsRequest {
+  repeated string ids = 1;
+}
+
+message TopicResponse {
+  string id = 1;
+  string name = 2;
+  string color = 3;
+  int32 postCount = 4;
+  string status = 5;
+}
+
+message TopicsResponse {
+  repeated TopicResponse topics = 1;
+}

@@ -24,3 +24,4 @@ export type Paginated<E> = {
   total: number;
 };
 
+

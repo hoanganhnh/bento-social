@@ -1,14 +1,22 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from "@nestjs/common";
+import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const databaseUrl =
   process.env.DATABASE_URL ||
-  'postgresql://bento:bento_secret@localhost:5432/bento_social';
+  "postgresql://bento:bento_secret@localhost:5432/topic_db";
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(PrismaService.name);
   private pool: Pool;
 
@@ -21,13 +29,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit() {
     await this.$connect();
-    this.logger.log('Connected to database');
+    this.logger.log("Connected to database");
   }
 
   async onModuleDestroy() {
     await this.$disconnect();
     await this.pool.end();
-    this.logger.log('Disconnected from database');
+    this.logger.log("Disconnected from database");
   }
 }
-

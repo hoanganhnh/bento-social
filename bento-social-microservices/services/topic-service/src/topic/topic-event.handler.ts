@@ -1,13 +1,13 @@
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from "@nestjs/common";
 import {
-  RedisClient,
+  RabbitMQClient,
   EvtPostCreated,
   EvtPostDeleted,
   PostCreatedEvent,
   PostDeletedEvent,
-} from '@bento/shared';
-import { ITopicService } from './topic.port';
-import { TOPIC_SERVICE } from './topic.di-token';
+} from "@bento/shared";
+import { ITopicService } from "./topic.port";
+import { TOPIC_SERVICE } from "./topic.di-token";
 
 @Injectable()
 export class TopicEventHandler implements OnModuleInit {
@@ -23,45 +23,49 @@ export class TopicEventHandler implements OnModuleInit {
   }
 
   private async subscribeToEvents() {
-    // Check if Redis is initialized
-    if (!RedisClient.isInitialized()) {
-      this.logger.warn('Redis not initialized, skipping event subscriptions');
+    if (!RabbitMQClient.isInitialized()) {
+      this.logger.warn(
+        "RabbitMQ not initialized, skipping event subscriptions",
+      );
       return;
     }
 
-    const redis = RedisClient.getInstance();
+    const rabbitmq = RabbitMQClient.getInstance();
 
-    // Subscribe to PostCreated event
-    await redis.subscribe(EvtPostCreated, async (message: string) => {
-      try {
-        const json = JSON.parse(message);
-        const event = PostCreatedEvent.from(json);
-        this.logger.log(`Received PostCreated event: ${event.id}`);
-
-        if (event.payload.topicId) {
-          await this.topicService.incrementPostCount(event.payload.topicId);
+    await rabbitmq.subscribe<PostCreatedEvent>(
+      EvtPostCreated,
+      async (event: PostCreatedEvent) => {
+        try {
+          this.logger.log(`Received PostCreated event: ${event.id}`);
+          if (event.payload.topicId) {
+            await this.topicService.incrementPostCount(event.payload.topicId);
+          }
+        } catch (error) {
+          this.logger.error(`Failed to handle PostCreated event: ${error}`);
+          throw error;
         }
-      } catch (error) {
-        this.logger.error(`Failed to handle PostCreated event: ${error}`);
-      }
-    });
+      },
+      "topic-service.post-created.queue",
+    );
 
-    // Subscribe to PostDeleted event
-    await redis.subscribe(EvtPostDeleted, async (message: string) => {
-      try {
-        const json = JSON.parse(message);
-        const event = PostDeletedEvent.from(json);
-        this.logger.log(`Received PostDeleted event: ${event.id}`);
-
-        if (event.payload.topicId) {
-          await this.topicService.decrementPostCount(event.payload.topicId);
+    await rabbitmq.subscribe<PostDeletedEvent>(
+      EvtPostDeleted,
+      async (event: PostDeletedEvent) => {
+        try {
+          this.logger.log(`Received PostDeleted event: ${event.id}`);
+          if (event.payload.topicId) {
+            await this.topicService.decrementPostCount(event.payload.topicId);
+          }
+        } catch (error) {
+          this.logger.error(`Failed to handle PostDeleted event: ${error}`);
+          throw error;
         }
-      } catch (error) {
-        this.logger.error(`Failed to handle PostDeleted event: ${error}`);
-      }
-    });
+      },
+      "topic-service.post-deleted.queue",
+    );
 
-    this.logger.log('Subscribed to PostCreated and PostDeleted events');
+    this.logger.log(
+      "Subscribed to PostCreated and PostDeleted events via RabbitMQ",
+    );
   }
 }
-

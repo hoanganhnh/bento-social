@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc FindById (FindByIdRequest) returns (UserResponse);
+  rpc FindByIds (FindByIdsRequest) returns (UsersResponse);
+}
+
+message FindByIdRequest {
+  string id = 1;
+}
+
+message FindByIdsRequest {
+  repeated string ids = 1;
+}
+
+message UserResponse {
+  string id = 1;
+  string username = 2;
+  string firstName = 3;
+  string lastName = 4;
+  string avatar = 5;
+  string cover = 6;
+  string bio = 7;
+  string websiteUrl = 8;
+  int32 followerCount = 9;
+  int32 postCount = 10;
+  string role = 11;
+  string status = 12;
+}
+
+message UsersResponse {
+  repeated UserResponse users = 1;
+}

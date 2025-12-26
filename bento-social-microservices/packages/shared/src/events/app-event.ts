@@ -52,3 +52,4 @@ export abstract class AppEvent<Payload> {
 
 export type EventHandler = (msg: string) => void;
 
+

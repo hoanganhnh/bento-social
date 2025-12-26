@@ -1,20 +1,29 @@
 // DTOs
-export * from './dto';
+export * from "./dto";
 
 // Events
-export * from './events';
+export * from "./events";
 
 // Interfaces
-export * from './interfaces';
+export * from "./interfaces";
 
 // Guards
-export * from './guards';
+export * from "./guards";
 
 // Decorators
-export * from './decorators';
+export * from "./decorators";
 
 // RPC Clients
-export * from './rpc';
+export * from "./rpc";
+
+// gRPC Clients
+export * from "./grpc/grpc-client.factory";
 
 // Utils
-export * from './utils';
+export * from "./utils";
+
+// Resilience (Circuit Breaker, Retry, Timeout, Bulkhead)
+export * from "./resilience";
+
+// Observability (Tracing, Metrics, Logging, Health)
+export * from "./observability";

@@ -1,0 +1,89 @@
+# Prometheus Configuration for Bento Social Microservices
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'bento-social'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#           - alertmanager:9093
+
+# Rule files (optional)
+# rule_files:
+#   - "alerts/*.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:3000']
+    metrics_path: '/metrics'
+
+  # Auth Service
+  - job_name: 'auth-service'
+    static_configs:
+      - targets: ['auth-service:3001']
+    metrics_path: '/metrics'
+
+  # User Service
+  - job_name: 'user-service'
+    static_configs:
+      - targets: ['user-service:3002']
+    metrics_path: '/metrics'
+
+  # Post Service
+  - job_name: 'post-service'
+    static_configs:
+      - targets: ['post-service:3003']
+    metrics_path: '/metrics'
+
+  # Topic Service
+  - job_name: 'topic-service'
+    static_configs:
+      - targets: ['topic-service:3004']
+    metrics_path: '/metrics'
+
+  # Comment Service
+  - job_name: 'comment-service'
+    static_configs:
+      - targets: ['comment-service:3005']
+    metrics_path: '/metrics'
+
+  # Notification Service
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['notification-service:3006']
+    metrics_path: '/metrics'
+
+  # Upload Service
+  - job_name: 'upload-service'
+    static_configs:
+      - targets: ['upload-service:3007']
+    metrics_path: '/metrics'
+
+  # Interaction Service
+  - job_name: 'interaction-service'
+    static_configs:
+      - targets: ['interaction-service:3008']
+    metrics_path: '/metrics'
+
+  # Redis Exporter (if deployed)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']
+
+  # PostgreSQL Exporter (if deployed)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+

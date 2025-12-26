@@ -27,3 +27,4 @@ export interface IPostSavedRpc {
   listPostIdsSaved(userId: string, postIds: string[]): Promise<Array<string>>;
 }
 
+

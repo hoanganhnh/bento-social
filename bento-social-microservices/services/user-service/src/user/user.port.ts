@@ -20,3 +20,4 @@ export interface IUserRepository {
   delete(id: string, isHard: boolean): Promise<void>;
 }
 
+

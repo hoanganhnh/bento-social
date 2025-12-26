@@ -1,13 +1,19 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { v7 as uuidv7 } from 'uuid';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { v7 as uuidv7 } from "uuid";
 import {
   Requester,
   UserRole,
   RedisClient,
+  RabbitMQClient,
   PostCreatedEvent,
   PostDeletedEvent,
-} from '@bento/shared';
-import { IPostRepository, IPostService, ITopicRpc, IUserRpc } from './post.port';
+} from "@bento/shared";
+import {
+  IPostRepository,
+  IPostService,
+  ITopicRpc,
+  IUserRpc,
+} from "./post.port";
 import {
   Post,
   PostType,
@@ -15,9 +21,14 @@ import {
   ErrAuthorNotFound,
   ErrTopicNotFound,
   ErrForbidden,
-} from './post.model';
-import { CreatePostDTO, UpdatePostDTO, createPostDTOSchema, updatePostDTOSchema } from './post.dto';
-import { POST_REPOSITORY, TOPIC_RPC, USER_RPC } from './post.di-token';
+} from "./post.model";
+import {
+  CreatePostDTO,
+  UpdatePostDTO,
+  createPostDTOSchema,
+  updatePostDTOSchema,
+} from "./post.dto";
+import { POST_REPOSITORY, TOPIC_RPC, USER_RPC } from "./post.di-token";
 
 @Injectable()
 export class PostService implements IPostService {
@@ -48,7 +59,7 @@ export class PostService implements IPostService {
     const post: Post = {
       id: uuidv7(),
       content: data.content,
-      image: data.image || '',
+      image: data.image || "",
       authorId: data.authorId,
       topicId: topic.id,
       isFeatured: false,
@@ -68,7 +79,11 @@ export class PostService implements IPostService {
     return post.id;
   }
 
-  async update(id: string, dto: UpdatePostDTO, requester: Requester): Promise<boolean> {
+  async update(
+    id: string,
+    dto: UpdatePostDTO,
+    requester: Requester,
+  ): Promise<boolean> {
     const data = updatePostDTOSchema.parse(dto);
 
     const post = await this.postRepository.get(id);
@@ -126,12 +141,13 @@ export class PostService implements IPostService {
 
   private _publishPostCreated(post: Post): void {
     try {
-      if (RedisClient.isInitialized()) {
-        const event = PostCreatedEvent.create(
-          { postId: post.id, topicId: post.topicId },
-          post.authorId,
-        );
-        RedisClient.getInstance().publish(event);
+      const event = PostCreatedEvent.create(
+        { postId: post.id, topicId: post.topicId },
+        post.authorId,
+      );
+
+      if (RabbitMQClient.isInitialized()) {
+        RabbitMQClient.getInstance().publish(event);
         this.logger.debug(`Published PostCreated event for post ${post.id}`);
       }
     } catch (error) {
@@ -141,12 +157,13 @@ export class PostService implements IPostService {
 
   private _publishPostDeleted(post: Post): void {
     try {
-      if (RedisClient.isInitialized()) {
-        const event = PostDeletedEvent.create(
-          { postId: post.id, topicId: post.topicId },
-          post.authorId,
-        );
-        RedisClient.getInstance().publish(event);
+      const event = PostDeletedEvent.create(
+        { postId: post.id, topicId: post.topicId },
+        post.authorId,
+      );
+
+      if (RabbitMQClient.isInitialized()) {
+        RabbitMQClient.getInstance().publish(event);
         this.logger.debug(`Published PostDeleted event for post ${post.id}`);
       }
     } catch (error) {
@@ -154,4 +171,3 @@ export class PostService implements IPostService {
     }
   }
 }
-

@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common';
-import { PostController } from './post.controller';
-import { PostRpcController } from './post-rpc.controller';
-import { PostService } from './post.service';
-import { PostRepository } from './post.repository';
-import { PostEventHandler } from './post-event.handler';
+import { Module } from "@nestjs/common";
+import { ClientsModule, Transport } from "@nestjs/microservices";
+import { PostController } from "./post.controller";
+import { PostRpcController } from "./post-rpc.controller";
+import { PostService } from "./post.service";
+import { PostRepository } from "./post.repository";
+import { PostEventHandler } from "./post-event.handler";
 import {
   POST_SERVICE,
   POST_REPOSITORY,
@@ -11,22 +12,75 @@ import {
   USER_RPC,
   POST_LIKED_RPC,
   POST_SAVED_RPC,
-} from './post.di-token';
+} from "./post.di-token";
 import {
-  TokenIntrospectRpcClient,
-  TOKEN_INTROSPECTOR,
-  TopicRpcClient,
-  UserRpcClient,
-  PostLikedRpcClient,
-  PostSavedRpcClient,
-} from '@bento/shared';
+  UserGrpcAdapter,
+  TopicGrpcAdapter,
+  InteractionGrpcAdapter,
+} from "./post-grpc.adapter";
+import { AuthGrpcAdapter } from "./auth-grpc.adapter";
+import { TOKEN_INTROSPECTOR } from "@bento/shared";
+import { join } from "path";
 
-const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:3002';
-const topicServiceUrl = process.env.TOPIC_SERVICE_URL || 'http://localhost:3004';
-const interactionServiceUrl = process.env.INTERACTION_SERVICE_URL || 'http://localhost:3008';
+const authServiceUrl = process.env.AUTH_GRPC_URL || "localhost:50052";
+const userServiceUrl = process.env.USER_GRPC_URL || "localhost:50051";
+const topicServiceUrl = process.env.TOPIC_GRPC_URL || "localhost:50053";
+const interactionServiceUrl =
+  process.env.INTERACTION_GRPC_URL || "localhost:50054";
 
 @Module({
+  imports: [
+    ClientsModule.register([
+      {
+        name: "AUTH_SERVICE",
+        transport: Transport.GRPC,
+        options: {
+          package: "auth",
+          protoPath: join(
+            __dirname,
+            "../../../../packages/shared/src/proto/auth.proto",
+          ),
+          url: authServiceUrl,
+        },
+      },
+      {
+        name: "USER_SERVICE",
+        transport: Transport.GRPC,
+        options: {
+          package: "user",
+          protoPath: join(
+            __dirname,
+            "../../../../packages/shared/src/proto/user.proto",
+          ),
+          url: userServiceUrl,
+        },
+      },
+      {
+        name: "TOPIC_SERVICE",
+        transport: Transport.GRPC,
+        options: {
+          package: "topic",
+          protoPath: join(
+            __dirname,
+            "../../../../packages/shared/src/proto/topic.proto",
+          ),
+          url: topicServiceUrl,
+        },
+      },
+      {
+        name: "INTERACTION_SERVICE",
+        transport: Transport.GRPC,
+        options: {
+          package: "interaction",
+          protoPath: join(
+            __dirname,
+            "../../../../packages/shared/src/proto/interaction.proto",
+          ),
+          url: interactionServiceUrl,
+        },
+      },
+    ]),
+  ],
   controllers: [PostController, PostRpcController],
   providers: [
     {
@@ -39,27 +93,26 @@ const interactionServiceUrl = process.env.INTERACTION_SERVICE_URL || 'http://loc
     },
     {
       provide: TOKEN_INTROSPECTOR,
-      useFactory: () => new TokenIntrospectRpcClient(`${authServiceUrl}/rpc/introspect`),
-    },
-    {
-      provide: TOPIC_RPC,
-      useFactory: () => new TopicRpcClient(topicServiceUrl),
+      useClass: AuthGrpcAdapter,
     },
     {
       provide: USER_RPC,
-      useFactory: () => new UserRpcClient(userServiceUrl),
+      useClass: UserGrpcAdapter,
+    },
+    {
+      provide: TOPIC_RPC,
+      useClass: TopicGrpcAdapter,
     },
     {
       provide: POST_LIKED_RPC,
-      useFactory: () => new PostLikedRpcClient(interactionServiceUrl),
+      useClass: InteractionGrpcAdapter,
     },
     {
       provide: POST_SAVED_RPC,
-      useFactory: () => new PostSavedRpcClient(interactionServiceUrl),
+      useClass: InteractionGrpcAdapter,
     },
     PostEventHandler,
   ],
   exports: [POST_SERVICE, POST_REPOSITORY],
 })
 export class PostModule {}
-
