@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # ============ INFRASTRUCTURE ============
   postgres:
@@ -11,13 +9,15 @@ services:
     environment:
       POSTGRES_USER: ${DB_USERNAME:-bento}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-bento_secret}
-      POSTGRES_DB: ${DB_NAME:-bento_social}
+      # Multiple databases for microservices isolation
+      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db,post_db,topic_db,comment_db,notification_db,interaction_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
     networks:
       - bento-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bento} -d ${DB_NAME:-bento_social}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bento}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -35,6 +35,26 @@ services:
       - bento-network
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-bento_redis}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: bento-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-bento}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-bento_rabbit}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - bento-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -90,8 +110,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/auth_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-bento}:${RABBITMQ_PASSWORD:-bento_rabbit}@rabbitmq:5672
       - JWT_SECRET=${JWT_SECRET:-bento_jwt_secret_key}
     networks:
       - bento-network
@@ -113,8 +134,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3002
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/user_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-bento}:${RABBITMQ_PASSWORD:-bento_rabbit}@rabbitmq:5672
       - AUTH_SERVICE_URL=http://auth-service:3001
     networks:
       - bento-network
@@ -134,8 +156,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3003
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/post_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-bento}:${RABBITMQ_PASSWORD:-bento_rabbit}@rabbitmq:5672
       - AUTH_SERVICE_URL=http://auth-service:3001
       - USER_SERVICE_URL=http://user-service:3002
       - TOPIC_SERVICE_URL=http://topic-service:3004
@@ -160,7 +183,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3004
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/topic_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
       - AUTH_SERVICE_URL=http://auth-service:3001
     networks:
@@ -183,8 +206,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3005
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/comment_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-bento}:${RABBITMQ_PASSWORD:-bento_rabbit}@rabbitmq:5672
       - AUTH_SERVICE_URL=http://auth-service:3001
       - USER_SERVICE_URL=http://user-service:3002
       - POST_SERVICE_URL=http://post-service:3003
@@ -208,7 +232,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3006
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/notification_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
       - AUTH_SERVICE_URL=http://auth-service:3001
       - USER_SERVICE_URL=http://user-service:3002
@@ -252,8 +276,9 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3008
-      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/${DB_NAME:-bento_social}
+      - DATABASE_URL=postgresql://${DB_USERNAME:-bento}:${DB_PASSWORD:-bento_secret}@postgres:5432/interaction_db
       - REDIS_URL=redis://:${REDIS_PASSWORD:-bento_redis}@redis:6379/0
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-bento}:${RABBITMQ_PASSWORD:-bento_rabbit}@rabbitmq:5672
       - AUTH_SERVICE_URL=http://auth-service:3001
       - USER_SERVICE_URL=http://user-service:3002
       - POST_SERVICE_URL=http://post-service:3003
@@ -272,5 +297,5 @@ networks:
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:
   uploads_data:
-
