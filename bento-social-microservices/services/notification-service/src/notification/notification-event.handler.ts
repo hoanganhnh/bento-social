@@ -9,10 +9,8 @@ import {
   PostCommentedEvent,
   IPostRpc,
   IAuthorRpc,
-  POST_RPC,
-  USER_RPC,
 } from '@bento/shared';
-import { NOTI_SERVICE } from './notification.di-token';
+import { NOTI_SERVICE, POST_RPC, USER_RPC } from './notification.di-token';
 import { NotificationAction, NotificationCreateDTO } from './notification.model';
 import { INotificationService } from './notification.port';
 

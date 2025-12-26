@@ -1,6 +1,14 @@
-import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
-import { Request, Response, NextFunction } from 'express';
-import { SERVICE_TARGETS, PROXY_ROUTES, RouteConfig, getProxyOptions } from '../config/proxy.config';
+import {
+  createProxyMiddleware,
+  Options,
+  RequestHandler,
+} from "http-proxy-middleware";
+import { Request, Response, NextFunction } from "express";
+import {
+  SERVICE_TARGETS,
+  PROXY_ROUTES,
+  RouteConfig,
+} from "../config/proxy.config";
 
 /**
  * Logger for proxy middleware
@@ -9,7 +17,7 @@ const logger = {
   info: (message: string) => console.log(`[Proxy] ${message}`),
   error: (message: string) => console.error(`[Proxy] ${message}`),
   debug: (message: string) => {
-    if (process.env.DEBUG === 'true') {
+    if (process.env.DEBUG === "true") {
       console.log(`[Proxy:Debug] ${message}`);
     }
   },
@@ -20,8 +28,8 @@ const logger = {
  * Supports :param style patterns
  */
 function matchRoute(path: string, pattern: string): boolean {
-  const pathParts = path.split('/').filter(Boolean);
-  const patternParts = pattern.split('/').filter(Boolean);
+  const pathParts = path.split("/").filter(Boolean);
+  const patternParts = pattern.split("/").filter(Boolean);
 
   // If path has fewer parts than pattern, no match
   if (pathParts.length < patternParts.length) {
@@ -34,7 +42,7 @@ function matchRoute(path: string, pattern: string): boolean {
     const pathPart = pathParts[i];
 
     // Skip parameter parts (e.g., :id)
-    if (patternPart.startsWith(':')) {
+    if (patternPart.startsWith(":")) {
       continue;
     }
 
@@ -53,7 +61,7 @@ function matchRoute(path: string, pattern: string): boolean {
 function findMatchingRoute(path: string): RouteConfig | null {
   // Sort routes by specificity (longer paths first)
   const sortedRoutes = [...PROXY_ROUTES].sort(
-    (a, b) => b.path.length - a.path.length
+    (a, b) => b.path.length - a.path.length,
   );
 
   for (const route of sortedRoutes) {
@@ -68,18 +76,21 @@ function findMatchingRoute(path: string): RouteConfig | null {
 /**
  * Build path rewrite function that handles :param patterns
  */
-function buildPathRewrite(pattern: string, targetPath: string): (path: string, req: Request) => string {
+function buildPathRewrite(
+  pattern: string,
+  targetPath: string,
+): (path: string, req: Request) => string {
   return (path: string, req: Request) => {
     // Extract params from original path
-    const pathParts = path.split('/').filter(Boolean);
-    const patternParts = pattern.split('/').filter(Boolean);
+    const pathParts = path.split("/").filter(Boolean);
+    const patternParts = pattern.split("/").filter(Boolean);
     const params: Record<string, string> = {};
 
     for (let i = 0; i < patternParts.length; i++) {
       const patternPart = patternParts[i];
       const pathPart = pathParts[i];
 
-      if (patternPart.startsWith(':')) {
+      if (patternPart.startsWith(":")) {
         const paramName = patternPart.slice(1);
         params[paramName] = pathPart;
       }
@@ -94,7 +105,7 @@ function buildPathRewrite(pattern: string, targetPath: string): (path: string, r
     // Handle extra path segments after the matched route
     if (pathParts.length > patternParts.length) {
       const extraParts = pathParts.slice(patternParts.length);
-      newPath = `${newPath}/${extraParts.join('/')}`;
+      newPath = `${newPath}/${extraParts.join("/")}`;
     }
 
     return newPath;
@@ -122,35 +133,50 @@ function createRouteProxy(route: RouteConfig): RequestHandler {
         (req as any).__proxyStartTime = startTime;
 
         // Forward relevant headers
-        const forwardHeaders = ['authorization', 'x-request-id', 'x-correlation-id', 'content-type'];
+        const forwardHeaders = [
+          "authorization",
+          "x-request-id",
+          "x-correlation-id",
+          "content-type",
+        ];
         forwardHeaders.forEach((header) => {
           const value = req.headers[header];
-          if (value && typeof value === 'string') {
+          if (value && typeof value === "string") {
             proxyReq.setHeader(header, value);
           }
         });
 
-        logger.debug(`→ ${req.method} ${req.originalUrl} -> ${service.url}${proxyReq.path}`);
+        logger.debug(
+          `→ ${req.method} ${req.originalUrl} -> ${service.url}${proxyReq.path}`,
+        );
       },
       proxyRes: (proxyRes, req: any, res) => {
-        const duration = Date.now() - ((req as any).__proxyStartTime || Date.now());
-        logger.info(`${req.method} ${req.originalUrl} -> ${proxyRes.statusCode} (${duration}ms) [${service.name}]`);
+        const duration =
+          Date.now() - ((req as any).__proxyStartTime || Date.now());
+        logger.info(
+          `${req.method} ${req.originalUrl} -> ${proxyRes.statusCode} (${duration}ms) [${service.name}]`,
+        );
 
         // Add service identifier header
-        proxyRes.headers['x-served-by'] = service.name;
+        proxyRes.headers["x-served-by"] = service.name;
       },
       error: (err, req: any, res: any) => {
-        const duration = Date.now() - ((req as any).__proxyStartTime || Date.now());
-        logger.error(`${req.method} ${req.originalUrl} -> ERROR (${duration}ms): ${err.message}`);
+        const duration =
+          Date.now() - ((req as any).__proxyStartTime || Date.now());
+        logger.error(
+          `${req.method} ${req.originalUrl} -> ERROR (${duration}ms): ${err.message}`,
+        );
 
         if (res && !res.headersSent) {
-          res.writeHead(502, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({
-            statusCode: 502,
-            message: 'Service unavailable',
-            error: 'Bad Gateway',
-            service: service.name,
-          }));
+          res.writeHead(502, { "Content-Type": "application/json" });
+          res.end(
+            JSON.stringify({
+              statusCode: 502,
+              message: "Service unavailable",
+              error: "Bad Gateway",
+              service: service.name,
+            }),
+          );
         }
       },
     },
@@ -169,11 +195,11 @@ const proxyCache = new Map<string, RequestHandler>();
  */
 function getOrCreateProxy(route: RouteConfig): RequestHandler {
   const cacheKey = `${route.service}:${route.path}`;
-  
+
   if (!proxyCache.has(cacheKey)) {
     proxyCache.set(cacheKey, createRouteProxy(route));
   }
-  
+
   return proxyCache.get(cacheKey)!;
 }
 
@@ -181,7 +207,11 @@ function getOrCreateProxy(route: RouteConfig): RequestHandler {
  * Main proxy middleware
  * Routes requests to appropriate microservices based on path matching
  */
-export function proxyMiddleware(req: Request, res: Response, next: NextFunction): void {
+export function proxyMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
   const route = findMatchingRoute(req.path);
 
   if (!route) {
@@ -196,11 +226,11 @@ export function proxyMiddleware(req: Request, res: Response, next: NextFunction)
   }
 
   // Build custom path rewrite if route has params
-  if (route.path.includes(':')) {
+  if (route.path.includes(":")) {
     // Extract the base target path (remove /v1 prefix)
-    const targetPath = route.path.replace('/v1', '');
+    const targetPath = route.path.replace("/v1", "");
     const rewriter = buildPathRewrite(route.path, targetPath);
-    
+
     // Create proxy with custom path rewrite
     const options: Options = {
       target: service.url,
@@ -214,33 +244,48 @@ export function proxyMiddleware(req: Request, res: Response, next: NextFunction)
           (req as any).__proxyStartTime = startTime;
 
           // Forward relevant headers
-          const forwardHeaders = ['authorization', 'x-request-id', 'x-correlation-id', 'content-type'];
+          const forwardHeaders = [
+            "authorization",
+            "x-request-id",
+            "x-correlation-id",
+            "content-type",
+          ];
           forwardHeaders.forEach((header) => {
             const value = req.headers[header];
-            if (value && typeof value === 'string') {
+            if (value && typeof value === "string") {
               proxyReq.setHeader(header, value);
             }
           });
 
-          logger.debug(`→ ${req.method} ${req.originalUrl} -> ${service.url}${proxyReq.path}`);
+          logger.debug(
+            `→ ${req.method} ${req.originalUrl} -> ${service.url}${proxyReq.path}`,
+          );
         },
         proxyRes: (proxyRes, req: any, res) => {
-          const duration = Date.now() - ((req as any).__proxyStartTime || Date.now());
-          logger.info(`${req.method} ${req.originalUrl} -> ${proxyRes.statusCode} (${duration}ms) [${service.name}]`);
-          proxyRes.headers['x-served-by'] = service.name;
+          const duration =
+            Date.now() - ((req as any).__proxyStartTime || Date.now());
+          logger.info(
+            `${req.method} ${req.originalUrl} -> ${proxyRes.statusCode} (${duration}ms) [${service.name}]`,
+          );
+          proxyRes.headers["x-served-by"] = service.name;
         },
         error: (err, req: any, res: any) => {
-          const duration = Date.now() - ((req as any).__proxyStartTime || Date.now());
-          logger.error(`${req.method} ${req.originalUrl} -> ERROR (${duration}ms): ${err.message}`);
+          const duration =
+            Date.now() - ((req as any).__proxyStartTime || Date.now());
+          logger.error(
+            `${req.method} ${req.originalUrl} -> ERROR (${duration}ms): ${err.message}`,
+          );
 
           if (res && !res.headersSent) {
-            res.writeHead(502, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-              statusCode: 502,
-              message: 'Service unavailable',
-              error: 'Bad Gateway',
-              service: service.name,
-            }));
+            res.writeHead(502, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                statusCode: 502,
+                message: "Service unavailable",
+                error: "Bad Gateway",
+                service: service.name,
+              }),
+            );
           }
         },
       },
@@ -260,11 +305,14 @@ export function proxyMiddleware(req: Request, res: Response, next: NextFunction)
  * Health check bypass middleware
  * Passes health check requests directly to NestJS health controller
  */
-export function healthCheckBypass(req: Request, res: Response, next: NextFunction): void {
-  if (req.path === '/health' || req.path === '/api/health') {
+export function healthCheckBypass(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  if (req.path === "/health" || req.path === "/api/health") {
     next();
     return;
   }
   proxyMiddleware(req, res, next);
 }
-

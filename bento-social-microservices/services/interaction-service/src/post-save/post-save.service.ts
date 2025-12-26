@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AppError, IPostRpc, POST_RPC } from '@bento/shared';
+import { AppError, IPostRpc } from '@bento/shared';
+import { POST_RPC } from './post-save.di-token';
 import { POST_SAVE_REPOSITORY } from './post-save.di-token';
 import {
   ActionDTO,

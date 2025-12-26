@@ -3,10 +3,9 @@ import {
   TokenIntrospectRpcClient,
   TOKEN_INTROSPECTOR,
   UserRpcClient,
-  USER_RPC,
 } from '@bento/shared';
 import { FollowingController } from './following.controller';
-import { FOLLOWING_REPOSITORY, FOLLOWING_SERVICE } from './following.di-token';
+import { FOLLOWING_REPOSITORY, FOLLOWING_SERVICE, USER_RPC } from './following.di-token';
 import { FollowingRepository } from './following.repository';
 import { FollowingService } from './following.service';
 

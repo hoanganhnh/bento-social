@@ -7,9 +7,8 @@ import {
   PagingDTO,
   PublicUser,
   Requester,
-  USER_RPC,
 } from '@bento/shared';
-import { NOTI_REPOSITORY } from './notification.di-token';
+import { NOTI_REPOSITORY, USER_RPC } from './notification.di-token';
 import {
   Notification,
   NotificationCondition,

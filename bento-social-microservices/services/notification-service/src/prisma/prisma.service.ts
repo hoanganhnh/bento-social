@@ -5,7 +5,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 
 const databaseUrl =
   process.env.DATABASE_URL ||
-  'postgresql://bento:bento_secret@localhost:5432/bento_social';
+  'postgresql://bento:bento_secret@localhost:5432/notification_db';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

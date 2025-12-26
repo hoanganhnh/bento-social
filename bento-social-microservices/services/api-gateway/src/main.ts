@@ -14,10 +14,9 @@ import "dotenv/config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: false, // Disable default body parser for proxy streaming
+    bodyParser: false,
   });
 
-  // ============ Security Headers (Helmet) ============
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -28,7 +27,7 @@ async function bootstrap() {
           scriptSrc: ["'self'"],
         },
       },
-      crossOriginEmbedderPolicy: false, // Disable for API gateway
+      crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: { policy: "cross-origin" },
       hsts: {
         maxAge: 31536000,
@@ -44,11 +43,9 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, Postman, etc.)
       if (!origin) return callback(null, true);
 
       if (process.env.NODE_ENV === "development") {
-        // Allow all origins in development
         return callback(null, true);
       }
 
@@ -87,11 +84,15 @@ async function bootstrap() {
     }
   };
 
-  // Parse JSON bodies (but not for multipart, which should stream through)
+  // Parse JSON bodies (but not for multipart or /v1 routes which will be proxied)
   app.use((req: any, res: any, next: any) => {
     const contentType = req.headers["content-type"] || "";
-    if (contentType.includes("multipart/form-data")) {
-      // Skip body parsing for multipart - let it stream through
+    // Skip body parsing for multipart or proxied routes
+    if (
+      contentType.includes("multipart/form-data") ||
+      req.path.startsWith("/v1")
+    ) {
+      // Skip body parsing - let proxy handle it
       return next();
     }
     bodyParser.json({ verify: rawBodyBuffer, limit: "10mb" })(req, res, next);
@@ -99,7 +100,11 @@ async function bootstrap() {
 
   app.use((req: any, res: any, next: any) => {
     const contentType = req.headers["content-type"] || "";
-    if (contentType.includes("multipart/form-data")) {
+    // Skip body parsing for multipart or proxied routes
+    if (
+      contentType.includes("multipart/form-data") ||
+      req.path.startsWith("/v1")
+    ) {
       return next();
     }
     bodyParser.urlencoded({

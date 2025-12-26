@@ -9,9 +9,8 @@ import {
   RedisClient,
   FollowedEvent,
   UnfollowedEvent,
-  USER_RPC,
 } from '@bento/shared';
-import { FOLLOWING_REPOSITORY } from './following.di-token';
+import { FOLLOWING_REPOSITORY, USER_RPC } from './following.di-token';
 import {
   ErrAlreadyFollowed,
   ErrFollowNotFound,

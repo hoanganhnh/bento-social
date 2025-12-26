@@ -3,10 +3,9 @@ import {
   TokenIntrospectRpcClient,
   TOKEN_INTROSPECTOR,
   PostRpcClient,
-  POST_RPC,
 } from '@bento/shared';
 import { PostSaveController, PostSaveRpcController } from './post-save.controller';
-import { POST_SAVE_REPOSITORY, POST_SAVE_SERVICE } from './post-save.di-token';
+import { POST_SAVE_REPOSITORY, POST_SAVE_SERVICE, POST_RPC } from './post-save.di-token';
 import { PostSaveRepository } from './post-save.repository';
 import { PostSaveService } from './post-save.service';
 

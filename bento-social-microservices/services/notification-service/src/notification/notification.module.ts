@@ -3,13 +3,11 @@ import {
   TokenIntrospectRpcClient,
   TOKEN_INTROSPECTOR,
   PostRpcClient,
-  POST_RPC,
   UserRpcClient,
-  USER_RPC,
 } from '@bento/shared';
 import { NotificationController } from './notification.controller';
 import { NotificationEventHandler } from './notification-event.handler';
-import { NOTI_REPOSITORY, NOTI_SERVICE } from './notification.di-token';
+import { NOTI_REPOSITORY, NOTI_SERVICE, POST_RPC, USER_RPC } from './notification.di-token';
 import { NotificationRepository } from './notification.repository';
 import { NotificationService } from './notification.service';
 
