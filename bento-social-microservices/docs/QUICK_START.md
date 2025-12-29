@@ -308,8 +308,7 @@ npx prisma generate              # Generate Prisma Client
 
 1. ✅ Services đang chạy → Test API endpoints
 2. ✅ Đọc [ARCHITECTURE_REVIEW.md](./ARCHITECTURE_REVIEW.md) để hiểu kiến trúc
-3. ✅ Xem [PROGRESS.md](../PROGRESS.md) để biết roadmap
-4. ✅ Đọc [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) cho API reference
+3. ✅ Đọc [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) cho API reference
 
 ---
 

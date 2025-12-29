@@ -2,23 +2,6 @@
 
 A social network backend built with NestJS microservices architecture, following best practices for scalability, reliability, and maintainability.
 
-## 🎯 Architecture Refactoring (In Progress)
-
-This project is undergoing a major architectural refactoring to address critical design issues:
-
-- ✅ **Phase 1 Complete**: Database Isolation (Eliminated Shared Database antipattern)
-- 🔄 **Phase 2**: Communication Layer Upgrade (gRPC/NestJS Microservices)
-- 🔄 **Phase 3**: Event Bus Upgrade (RabbitMQ for reliability)
-- 🔄 **Phase 4**: API Gateway Improvement
-- 🔄 **Phase 5**: Resilience & Observability
-
-**📚 Documentation:**
-
-- [Refactoring Roadmap](./REFACTORING_ROADMAP.md) - Complete refactoring plan
-- [Progress Tracker](./PROGRESS.md) - Detailed checklist
-- [Migration Guide](./MIGRATION_GUIDE.md) - Database migration instructions
-- [Phase 1 Complete](./PHASE1_COMPLETE.md) - Testing instructions
-
 ## 📁 Project Structure
 
 ```
@@ -71,7 +54,6 @@ bento-social-microservices/
 3. **Run Prisma migrations for each service**
 
    ```bash
-   # See PHASE1_COMPLETE.md for detailed instructions
    cd services/auth-service && npx prisma migrate dev --name init
    cd ../user-service && npx prisma migrate dev --name init
    # ... repeat for all services
@@ -134,54 +116,9 @@ docker compose down
 | RabbitMQ Management | 15672 | User: `bento`, Pass: `bento_rabbit` |
 | Adminer (DB UI)     | 8080  | -                                   |
 
-## 📡 API Routes
-
-All routes are proxied through the API Gateway at `http://localhost:3000/v1/*`
-
-### Authentication
-
-- `POST /v1/register` - Register new user
-- `POST /v1/authenticate` - Login
-- `GET /v1/profile` - Get current user profile
-
-### Users
-
-- `GET /v1/users/:id` - Get user by ID
-- `GET /v1/users-suggested` - Get suggested users
-
-### Posts
-
-- `GET /v1/posts` - List posts
-- `GET /v1/posts/:id` - Get post by ID
-- `POST /v1/posts` - Create post
-- `PATCH /v1/posts/:id` - Update post
-- `DELETE /v1/posts/:id` - Delete post
-
-### Topics
-
-- `GET /v1/topics` - List topics
-- `POST /v1/topics` - Create topic (Admin)
-
-### Comments
-
-- `GET /v1/posts/:id/comments` - List comments
-- `POST /v1/posts/:id/comments` - Create comment
-
-### Interactions
-
-- `POST /v1/posts/:id/like` - Like post
-- `DELETE /v1/posts/:id/unlike` - Unlike post
-- `POST /v1/users/:id/follow` - Follow user
-- `DELETE /v1/users/:id/unfollow` - Unfollow user
-
-### Notifications
-
-- `GET /v1/notifications` - List notifications
-- `POST /v1/notifications/:id/read` - Mark as read
-
 ## 🏗️ Architecture
 
-### Current Architecture (Phase 1 Complete)
+### Current Architecture
 
 ```
 ┌─────────────┐
@@ -209,7 +146,7 @@ All routes are proxied through the API Gateway at `http://localhost:3000/v1/*`
    (Cache)      (Events)
 ```
 
-### Key Improvements (Phase 1)
+### Key Improvements
 
 ✅ **Database-per-Service Pattern**
 
@@ -284,27 +221,8 @@ open http://localhost:8080
 # Access RabbitMQ Management UI
 open http://localhost:15672
 
-# Login: bento / bento_rabbit
 ```
-
-## 🔧 Troubleshooting
-
-See [PHASE1_COMPLETE.md](./PHASE1_COMPLETE.md) for detailed troubleshooting steps.
-
-Common issues:
-
-- **Database connection errors**: Verify DATABASE_URL in each service
-- **RabbitMQ connection refused**: Wait for RabbitMQ to fully start
-- **Permission denied on init script**: Run `chmod +x scripts/init-databases.sh`
-
-## 📚 Additional Documentation
-
-- [REFACTORING_ROADMAP.md](./REFACTORING_ROADMAP.md) - Complete 5-phase refactoring plan
-- [PROGRESS.md](./PROGRESS.md) - Detailed progress checklist
-- [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) - Database migration guide
-- [PHASE1_COMPLETE.md](./PHASE1_COMPLETE.md) - Phase 1 testing instructions
 
 ## 📄 License
 
 MIT
-
