@@ -18,6 +18,7 @@ async function bootstrap() {
 
   const rabbitmqUrl =
     process.env.RABBITMQ_URL || "amqp://bento:bento_rabbit@localhost:5672";
+
   await RabbitMQClient.getInstance().connect(rabbitmqUrl);
 
   const port = process.env.PORT ?? 3003;
