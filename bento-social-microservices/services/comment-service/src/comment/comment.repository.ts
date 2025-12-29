@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { Comment as CommentPrisma } from '@prisma/client';
-import { ErrNotFound, Paginated, PagingDTO } from '@bento/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { ICommentRepository } from './comment.port';
-import { Comment, CommentCondDTO, CommentStatus, CommentUpdateDTO } from './comment.model';
+import { Injectable } from "@nestjs/common";
+import { Comment as CommentPrisma } from "@generated/comment-client";
+import { ErrNotFound, Paginated, PagingDTO } from "@bento/shared";
+import { PrismaService } from "../prisma/prisma.service";
+import { ICommentRepository } from "./comment.port";
+import {
+  Comment,
+  CommentCondDTO,
+  CommentStatus,
+  CommentUpdateDTO,
+} from "./comment.model";
 
 @Injectable()
 export class CommentRepository implements ICommentRepository {
@@ -31,15 +36,22 @@ export class CommentRepository implements ICommentRepository {
     return this._toComment(comment);
   }
 
-  async findByIds(ids: string[], field: string, limit?: number): Promise<Array<Comment>> {
+  async findByIds(
+    ids: string[],
+    field: string,
+    limit?: number,
+  ): Promise<Array<Comment>> {
     if (ids.length === 0) return [];
-    
+
     const sql = ids
-      .map((id) => `(SELECT * FROM comments WHERE ${field} = '${id}' ORDER BY id ASC LIMIT ${limit || 3})`)
-      .join(' UNION ');
-    
+      .map(
+        (id) =>
+          `(SELECT * FROM comments WHERE ${field} = '${id}' ORDER BY id ASC LIMIT ${limit || 3})`,
+      )
+      .join(" UNION ");
+
     const replies = await this.prisma.$queryRawUnsafe<any[]>(sql);
-    
+
     return replies.map((item) => ({
       id: item.id,
       userId: item.user_id,
@@ -54,7 +66,10 @@ export class CommentRepository implements ICommentRepository {
     }));
   }
 
-  async list(dto: CommentCondDTO, paging: PagingDTO): Promise<Paginated<Comment>> {
+  async list(
+    dto: CommentCondDTO,
+    paging: PagingDTO,
+  ): Promise<Paginated<Comment>> {
     const conditions: Record<string, any> = {};
     if (dto.postId) {
       conditions.postId = dto.postId;
@@ -76,7 +91,7 @@ export class CommentRepository implements ICommentRepository {
       take: paging.limit,
       skip,
       orderBy: {
-        id: 'asc',
+        id: "asc",
       },
     });
 
@@ -115,14 +130,22 @@ export class CommentRepository implements ICommentRepository {
     await this.prisma.comment.delete({ where: { id } });
   }
 
-  async increaseLikeCount(id: string, field: string, step: number): Promise<void> {
+  async increaseLikeCount(
+    id: string,
+    field: string,
+    step: number,
+  ): Promise<void> {
     await this.prisma.comment.update({
       where: { id },
       data: { [field]: { increment: step } },
     });
   }
 
-  async decreaseLikeCount(id: string, field: string, step: number): Promise<void> {
+  async decreaseLikeCount(
+    id: string,
+    field: string,
+    step: number,
+  ): Promise<void> {
     await this.prisma.comment.update({
       where: { id },
       data: { [field]: { decrement: step } },
@@ -144,4 +167,3 @@ export class CommentRepository implements ICommentRepository {
     };
   }
 }
-

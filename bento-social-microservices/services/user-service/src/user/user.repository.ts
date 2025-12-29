@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User as UserPrisma } from '@prisma/client';
+import { User as UserPrisma } from '@generated/user-client';
 import { PrismaService } from '../prisma/prisma.service';
 import { IUserRepository } from './user.port';
 import { User, Status } from './user.model';
@@ -23,11 +23,16 @@ export class UserRepository implements IUserRepository {
   }
 
   async listByIds(ids: string[]): Promise<User[]> {
-    const data = await this.prisma.user.findMany({ where: { id: { in: ids } } });
+    const data = await this.prisma.user.findMany({
+      where: { id: { in: ids } },
+    });
     return data.map(this._toModel);
   }
 
-  async getSuggestedUsers(currentUserId: string, limit: number): Promise<User[]> {
+  async getSuggestedUsers(
+    currentUserId: string,
+    limit: number,
+  ): Promise<User[]> {
     try {
       // Get IDs of users the current user is already following
       const following = await this.prisma.follower.findMany({
@@ -86,4 +91,3 @@ export class UserRepository implements IUserRepository {
     } as User;
   }
 }
-

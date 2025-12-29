@@ -1,10 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { User as PrismaUser, UserRole as PrismaUserRole, UserStatus } from '@prisma/client';
-import { UserRole } from '@bento/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { IUserRepository } from './auth.port';
-import { UserCondDTO, UserUpdateDTO } from './auth.dto';
-import { User, Status } from './user.model';
+import { Injectable } from "@nestjs/common";
+import {
+  User as PrismaUser,
+  UserRole as PrismaUserRole,
+  UserStatus,
+} from "@generated/auth-client";
+import { UserRole } from "@bento/shared";
+import { PrismaService } from "../prisma/prisma.service";
+import { IUserRepository } from "./auth.port";
+import { UserCondDTO, UserUpdateDTO } from "./auth.dto";
+import { User, Status } from "./user.model";
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -72,11 +76,11 @@ export class UserRepository implements IUserRepository {
 
   async update(id: string, dto: UserUpdateDTO): Promise<void> {
     const data: any = { ...dto };
-    
+
     if (dto.role) {
       data.role = this.toPrismaRole(dto.role);
     }
-    
+
     data.updatedAt = new Date();
 
     await this.prisma.user.update({
@@ -125,5 +129,3 @@ export class UserRepository implements IUserRepository {
     return role === PrismaUserRole.admin ? UserRole.ADMIN : UserRole.USER;
   }
 }
-
-

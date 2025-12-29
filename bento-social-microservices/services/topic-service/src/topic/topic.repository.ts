@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Topic as TopicPrisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { ITopicRepository } from './topic.port';
-import { Topic, TopicStatus } from './topic.model';
-import { TopicCondDTO, UpdateTopicDTO, TopicQueryDTO } from './topic.dto';
+import { Injectable } from "@nestjs/common";
+import { Topic as TopicPrisma } from "@generated/topic-client";
+import { PrismaService } from "../prisma/prisma.service";
+import { ITopicRepository } from "./topic.port";
+import { Topic, TopicStatus } from "./topic.model";
+import { TopicCondDTO, UpdateTopicDTO, TopicQueryDTO } from "./topic.dto";
 
 @Injectable()
 export class TopicRepository implements ITopicRepository {
@@ -28,12 +28,14 @@ export class TopicRepository implements ITopicRepository {
     return data.map(this._toModel);
   }
 
-  async list(query: TopicQueryDTO): Promise<{ topics: Topic[]; total: number }> {
+  async list(
+    query: TopicQueryDTO,
+  ): Promise<{ topics: Topic[]; total: number }> {
     const { page, limit, status, search } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    
+
     // Default to active topics only
     if (status) {
       where.status = status;
@@ -43,7 +45,7 @@ export class TopicRepository implements ITopicRepository {
 
     // Search by name
     if (search) {
-      where.name = { contains: search, mode: 'insensitive' };
+      where.name = { contains: search, mode: "insensitive" };
     }
 
     const [topics, total] = await Promise.all([
@@ -51,7 +53,7 @@ export class TopicRepository implements ITopicRepository {
         where,
         skip,
         take: limit,
-        orderBy: { postCount: 'desc' },
+        orderBy: { postCount: "desc" },
       }),
       this.prisma.topic.count({ where }),
     ]);
@@ -124,4 +126,3 @@ export class TopicRepository implements ITopicRepository {
     } as Topic;
   }
 }
-

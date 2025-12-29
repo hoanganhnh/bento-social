@@ -14,12 +14,15 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-bento}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-bento_secret}
       POSTGRES_DB: ${DB_NAME:-bento_social}
+      # Multiple databases for microservices isolation
+      POSTGRES_MULTIPLE_DATABASES: auth_db,user_db,post_db,topic_db,comment_db,notification_db,interaction_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-databases.sh:/docker-entrypoint-initdb.d/init-databases.sh
     networks:
       - bento-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bento} -d ${DB_NAME:-bento_social}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-bento}"]
       interval: 10s
       timeout: 5s
       retries: 5

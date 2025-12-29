@@ -4,7 +4,7 @@ import {
   OnModuleDestroy,
   Logger,
 } from "@nestjs/common";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@generated/notification-client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 

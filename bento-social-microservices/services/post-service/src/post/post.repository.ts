@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Post as PostPrisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { IPostRepository } from './post.port';
-import { Post, PostType } from './post.model';
-import { PostCondDTO, UpdatePostDTO } from './post.dto';
-import { Paginated, PagingDTO } from '@bento/shared';
+import { Injectable, Logger } from "@nestjs/common";
+import { Post as PostPrisma } from "@generated/post-client";
+import { PrismaService } from "../prisma/prisma.service";
+import { IPostRepository } from "./post.port";
+import { Post, PostType } from "./post.model";
+import { PostCondDTO, UpdatePostDTO } from "./post.dto";
+import { Paginated, PagingDTO } from "@bento/shared";
 
 @Injectable()
 export class PostRepository implements IPostRepository {
@@ -32,7 +32,7 @@ export class PostRepository implements IPostRepository {
     }
 
     if (str) {
-      where.content = { contains: str, mode: 'insensitive' };
+      where.content = { contains: str, mode: "insensitive" };
     }
 
     const total = await this.prisma.post.count({ where });
@@ -42,7 +42,7 @@ export class PostRepository implements IPostRepository {
       where,
       take: paging.limit,
       skip,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return {
@@ -98,7 +98,9 @@ export class PostRepository implements IPostRepository {
         data: { [field]: { increment: step } },
       });
     } catch (error) {
-      this.logger.error(`Failed to increment ${field} for post ${id}: ${error}`);
+      this.logger.error(
+        `Failed to increment ${field} for post ${id}: ${error}`,
+      );
     }
   }
 
@@ -109,14 +111,16 @@ export class PostRepository implements IPostRepository {
         data: { [field]: { decrement: step } },
       });
     } catch (error) {
-      this.logger.error(`Failed to decrement ${field} for post ${id}: ${error}`);
+      this.logger.error(
+        `Failed to decrement ${field} for post ${id}: ${error}`,
+      );
     }
   }
 
   private _toModel(data: PostPrisma): Post {
     return {
       ...data,
-      image: data.image ?? '',
+      image: data.image ?? "",
       isFeatured: data.isFeatured ?? false,
       commentCount: data.commentCount ?? 0,
       likedCount: data.likedCount ?? 0,
@@ -124,4 +128,3 @@ export class PostRepository implements IPostRepository {
     } as Post;
   }
 }
-
