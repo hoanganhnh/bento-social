@@ -17,7 +17,7 @@ export default function HeaderFollowers() {
         className="size-[44px]"
       />
       <Typography level="title" className="text-secondary">
-        200Lab
+        ptit
       </Typography>
     </section>
   );

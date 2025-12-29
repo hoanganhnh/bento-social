@@ -184,15 +184,15 @@ export default function Post({
     >
       <div className="flex items-start gap-5">
         <Link
-          href={`/profile/${localData.author.id}`}
+          href={`/profile/${localData.author?.id}`}
           className="cursor-pointer"
         >
-          <Avatar alt="avatar" src={localData.author.avatar || ''} size={44} />
+          <Avatar alt="avatar" src={localData.author?.avatar || ''} size={44} />
         </Link>
         <div className="w-full flex flex-col gap-2">
           <div className="relative z-0 flex justify-items-auto items-center">
             <Link
-              href={`/profile/${localData.author.id}`}
+              href={`/profile/${localData.author?.id}`}
               className="cursor-pointer"
             >
               <Typography
@@ -209,7 +209,7 @@ export default function Post({
               {relativeTime(new Date(localData.createdAt))}
             </Typography>
 
-            {data.author.id === (userProfile as IUserProfile).id && (
+            {data.author?.id === (userProfile as IUserProfile).id && (
               <MoreIcon onClick={handleMoreOptions} />
             )}
           </div>

@@ -1,9 +1,4 @@
-import {
-  BookIcon,
-  ExploreIcon,
-  MessageIcon,
-  NotificationIcon,
-} from '@/components/icons';
+import { BookIcon, ExploreIcon, NotificationIcon } from '@/components/icons';
 import HomeIcon from '@/components/icons/home';
 import Profile from '@/components/icons/profile';
 
@@ -20,11 +15,6 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     update: { status: true, count: 1 },
     Icon: <NotificationIcon />,
     path: '/notifications',
-  },
-  {
-    title: 'Messages',
-    Icon: <MessageIcon />,
-    path: '/messages',
   },
   {
     title: 'Bookmarks',

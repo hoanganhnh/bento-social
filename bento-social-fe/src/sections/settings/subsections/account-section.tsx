@@ -206,15 +206,6 @@ export const AccountsSection = () => {
           </span>
         </div>
         <div className="flex w-full p-4 border-t border-t-neutral2-2  hover:bg-neutral2-2 justify-between items-center group/item">
-          <span className="inline-flex gap-3 items-center">
-            <ProtectionIcon />
-            <Typography
-              level="base2r"
-              className=" text-sm text-secondary opacity-80"
-            >
-              Direct messages
-            </Typography>
-          </span>
           <span className="flex gap-1 opacity-80 items-center">
             <Typography
               level="baser"

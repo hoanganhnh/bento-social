@@ -4,7 +4,7 @@ import 'dotenv/config';
 
 const databaseUrl =
   process.env.DATABASE_URL ||
-  'postgresql://bento:bento_secret@localhost:5432/bento_social';
+  'postgresql://bento:bento_secret@localhost:5432/user_db';
 
 export default defineConfig({
   schema: path.join(__dirname, 'prisma', 'schema.prisma'),
@@ -12,5 +12,3 @@ export default defineConfig({
     url: databaseUrl,
   },
 });
-
-
