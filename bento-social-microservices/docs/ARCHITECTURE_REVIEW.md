@@ -4,33 +4,21 @@
 
 **Bento Social** là một hệ thống backend microservices được xây dựng với NestJS, tuân theo các best practices về scalability, reliability và maintainability. Dự án đang trong quá trình refactoring để cải thiện kiến trúc.
 
-### Trạng Thái Hiện Tại
-
-- ✅ **Phase 1**: Database Isolation (100% Complete)
-- ✅ **Phase 4**: API Gateway Upgrade (100% Complete)
-- ✅ **Phase 5**: Resilience & Observability (100% Complete)
-- 🔄 **Phase 2**: gRPC/TCP Communication (0% - Not Started)
-- 🔄 **Phase 3**: RabbitMQ Events (0% - Not Started)
-
-**Overall Progress**: 60% (3/5 phases complete)
-
----
-
 ## 🏛️ Kiến Trúc Tổng Thể
 
 ### High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        Frontend                              │
-│                    (React/Vue/etc)                           │
+│                        Frontend                             │
+│                         (React)                             │
 └───────────────────────┬─────────────────────────────────────┘
                         │
                         │ HTTP/REST
                         ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                    API Gateway                              │
-│                  (Port 3000)                                 │
+│                  (Port 3000)                                │
 │  • Rate Limiting                                            │
 │  • Request Caching                                          │
 │  • Security Headers (Helmet)                                │
@@ -68,15 +56,15 @@
 │  (No DB)         │                                  │  DB: interaction │
 └──────────────────┘                                  └──────────────────┘
         │                                                     │
-        └──────────────────┬────────────────────────────────┘
+        └──────────────────┬──────────────────────────────────┘
                            │
         ┌──────────────────┴──────────────────┐
         │                                     │
         ▼                                     ▼
 ┌──────────────────┐                  ┌──────────────────┐
-│     Redis        │                  │    RabbitMQ       │
-│   (Caching)      │                  │  (Event Bus)      │
-│   Port: 6379     │                  │   Port: 5672      │
+│     Redis        │                  │    RabbitMQ      │
+│   (Caching)      │                  │  (Event Bus)     │
+│   Port: 6379     │                  │   Port: 5672     │
 └──────────────────┘                  └──────────────────┘
         │                                     │
         └──────────────────┬──────────────────┘
@@ -85,7 +73,7 @@
                 ┌──────────────────┐
                 │   PostgreSQL     │
                 │   Port: 5432     │
-                │  (7 Databases)  │
+                │  (7 Databases)   │
                 └──────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -98,30 +86,30 @@
 
 ### Microservices Overview
 
-| Service | Port | Database | Description | Dependencies |
-|---------|------|----------|-------------|--------------|
-| **API Gateway** | 3000 | - | Entry point, routing, rate limiting | All services |
-| **Auth Service** | 3001 | auth_db | Authentication, JWT tokens | Redis |
-| **User Service** | 3002 | user_db | User profiles, suggestions | Redis, Auth |
-| **Post Service** | 3003 | post_db | Posts CRUD | Redis, Auth, User, Topic, Interaction |
-| **Topic Service** | 3004 | topic_db | Topics/categories | Redis, Auth |
-| **Comment Service** | 3005 | comment_db | Comments on posts | Redis, RabbitMQ, Auth, User, Post |
-| **Notification Service** | 3006 | notification_db | User notifications | Redis, RabbitMQ, Auth, User, Post |
-| **Upload Service** | 3007 | - | File uploads (images) | Auth |
-| **Interaction Service** | 3008 | interaction_db | Likes, Saves, Follows | Redis, RabbitMQ, Auth, User, Post |
+| Service                  | Port | Database        | Description                         | Dependencies                          |
+| ------------------------ | ---- | --------------- | ----------------------------------- | ------------------------------------- |
+| **API Gateway**          | 3000 | -               | Entry point, routing, rate limiting | All services                          |
+| **Auth Service**         | 3001 | auth_db         | Authentication, JWT tokens          | Redis                                 |
+| **User Service**         | 3002 | user_db         | User profiles, suggestions          | Redis, Auth                           |
+| **Post Service**         | 3003 | post_db         | Posts CRUD                          | Redis, Auth, User, Topic, Interaction |
+| **Topic Service**        | 3004 | topic_db        | Topics/categories                   | Redis, Auth                           |
+| **Comment Service**      | 3005 | comment_db      | Comments on posts                   | Redis, RabbitMQ, Auth, User, Post     |
+| **Notification Service** | 3006 | notification_db | User notifications                  | Redis, RabbitMQ, Auth, User, Post     |
+| **Upload Service**       | 3007 | -               | File uploads (images)               | Auth                                  |
+| **Interaction Service**  | 3008 | interaction_db  | Likes, Saves, Follows               | Redis, RabbitMQ, Auth, User, Post     |
 
 ### Infrastructure Services
 
-| Service | Port | Purpose | Credentials |
-|---------|------|---------|-------------|
-| **PostgreSQL** | 5432 | Database (7 databases) | bento / bento_secret |
-| **Redis** | 6379 | Caching, Session Store | Password: bento_redis |
-| **RabbitMQ** | 5672 | Event Bus (AMQP) | bento / bento_rabbit |
-| **RabbitMQ UI** | 15672 | Management Interface | bento / bento_rabbit |
-| **Adminer** | 8080 | Database Admin UI | - |
-| **Jaeger** | 16686 | Tracing UI | - |
-| **Prometheus** | 9090 | Metrics | - |
-| **Grafana** | 3030 | Dashboards | admin / admin |
+| Service         | Port  | Purpose                | Credentials           |
+| --------------- | ----- | ---------------------- | --------------------- |
+| **PostgreSQL**  | 5432  | Database (7 databases) | bento / bento_secret  |
+| **Redis**       | 6379  | Caching, Session Store | Password: bento_redis |
+| **RabbitMQ**    | 5672  | Event Bus (AMQP)       | bento / bento_rabbit  |
+| **RabbitMQ UI** | 15672 | Management Interface   | bento / bento_rabbit  |
+| **Adminer**     | 8080  | Database Admin UI      | -                     |
+| **Jaeger**      | 16686 | Tracing UI             | -                     |
+| **Prometheus**  | 9090  | Metrics                | -                     |
+| **Grafana**     | 3030  | Dashboards             | admin / admin         |
 
 ---
 
@@ -183,6 +171,7 @@ bento-social-microservices/
 ### 1. Database-per-Service Pattern ✅
 
 Mỗi microservice có database riêng:
+
 - **auth_db**: Authentication data
 - **user_db**: User profiles
 - **post_db**: Posts
@@ -192,6 +181,7 @@ Mỗi microservice có database riêng:
 - **interaction_db**: Likes, saves, follows
 
 **Lợi ích:**
+
 - ✅ Schema isolation
 - ✅ Independent scaling
 - ✅ Fault isolation
@@ -200,6 +190,7 @@ Mỗi microservice có database riêng:
 ### 2. API Gateway Pattern ✅
 
 **Features:**
+
 - ✅ Request routing với `http-proxy-middleware`
 - ✅ Rate limiting (express-rate-limit)
   - General: 100 req/min
@@ -214,16 +205,19 @@ Mỗi microservice có database riêng:
 ### 3. Resilience Patterns ✅
 
 **Circuit Breaker** (Opossum):
+
 - Tự động mở khi error rate > 50%
 - Half-open state để test recovery
 - Fallback functions
 
 **Retry với Exponential Backoff**:
+
 - Default: 3 retries
 - Exponential backoff: 1s → 2s → 4s
 - Không retry client errors (4xx)
 
 **Timeout Handling**:
+
 - Fast operations: 1s
 - Standard API: 5s
 - Database: 10s
@@ -231,6 +225,7 @@ Mỗi microservice có database riêng:
 - Uploads: 60s
 
 **Bulkhead Pattern**:
+
 - Giới hạn concurrent requests
 - Queue management
 - Reject khi queue đầy
@@ -238,11 +233,13 @@ Mỗi microservice có database riêng:
 ### 4. Observability Stack ✅
 
 **Distributed Tracing** (OpenTelemetry + Jaeger):
+
 - Auto-instrumentation
 - Trace context propagation
 - Service map visualization
 
 **Metrics** (Prometheus):
+
 - HTTP request duration
 - Request count by status
 - Error rates
@@ -250,11 +247,13 @@ Mỗi microservice có database riêng:
 - Bulkhead metrics
 
 **Logging**:
+
 - Structured JSON logs
 - Trace ID correlation
 - Log levels (DEBUG, INFO, WARN, ERROR)
 
 **Health Checks**:
+
 - Liveness probes
 - Readiness probes
 - Service dependency checks
@@ -331,24 +330,28 @@ pnpm build:shared
 #### Bước 4: Start Services
 
 **Terminal 1 - API Gateway:**
+
 ```bash
 pnpm dev:gateway
 # Runs on http://localhost:3000
 ```
 
 **Terminal 2 - Auth Service:**
+
 ```bash
 pnpm dev:auth
 # Runs on http://localhost:3001
 ```
 
 **Terminal 3 - User Service:**
+
 ```bash
 pnpm dev:user
 # Runs on http://localhost:3002
 ```
 
 **Terminal 4+ - Other Services:**
+
 ```bash
 pnpm dev:post
 pnpm dev:topic
@@ -491,6 +494,7 @@ docker compose logs api-gateway | grep CircuitBreaker
 ### 7. Observability Testing
 
 **Jaeger Tracing:**
+
 ```bash
 # Make some API calls
 curl http://localhost:3000/v1/posts
@@ -500,6 +504,7 @@ curl http://localhost:3000/v1/posts
 ```
 
 **Prometheus Metrics:**
+
 ```bash
 # Query metrics
 curl http://localhost:9090/api/v1/query?query=bento_http_requests_total
@@ -508,6 +513,7 @@ curl http://localhost:9090/api/v1/query?query=bento_http_requests_total
 ```
 
 **Grafana Dashboards:**
+
 ```bash
 # Access Grafana: http://localhost:3030
 # Login: admin / admin
@@ -577,6 +583,7 @@ docker compose logs -f --timestamps api-gateway
 ### Common Issues
 
 **1. Database Connection Errors**
+
 ```bash
 # Check if PostgreSQL is running
 docker compose ps postgres
@@ -588,6 +595,7 @@ docker exec -it bento-postgres psql -U bento -l
 ```
 
 **2. Port Already in Use**
+
 ```bash
 # Find process using port
 lsof -i :3000
@@ -599,6 +607,7 @@ kill -9 <PID>
 ```
 
 **3. Prisma Migration Errors**
+
 ```bash
 # Reset database (⚠️ deletes data)
 npx prisma migrate reset
@@ -608,6 +617,7 @@ npx prisma migrate dev --name fix
 ```
 
 **4. Service Not Starting**
+
 ```bash
 # Check logs
 docker compose logs <service-name>
@@ -620,6 +630,7 @@ docker compose ps
 ```
 
 **5. Rate Limiting Too Aggressive**
+
 ```bash
 # Adjust in api-gateway/src/middleware/rate-limit.middleware.ts
 # Or disable temporarily for testing
@@ -664,28 +675,3 @@ docker compose ps
 - Enable HTTPS in production
 - Implement API key authentication for internal services
 - Regular security audits
-
----
-
-## 📚 Additional Resources
-
-- [PROGRESS.md](../PROGRESS.md) - Detailed progress tracking
-- [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) - Database migration guide
-- [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Quick reference guide
-- [README.md](../README.md) - Main README
-
----
-
-## 🎯 Next Steps
-
-1. **Complete Phase 2**: Implement gRPC communication
-2. **Complete Phase 3**: Migrate to RabbitMQ for events
-3. **Add Integration Tests**: E2E testing suite
-4. **CI/CD Pipeline**: Automated testing and deployment
-5. **Production Deployment**: Kubernetes or Docker Swarm
-
----
-
-**Last Updated**: 2025-12-26  
-**Version**: 1.0.0
-
