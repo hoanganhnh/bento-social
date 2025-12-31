@@ -8,19 +8,9 @@ import { register } from '@/apis/auth';
 import { registerSchema } from '../data';
 
 import { Button } from '@/components/button';
-import { GoogleSVG, LogoSVG } from '@/components/icons';
+import { LogoSVG } from '@/components/icons';
 import { DebouncedInput } from '@/components/input';
 import { Typography } from '@/components/typography';
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/alert-dialog';
 
 import styled from '@/styles/auth.module.css';
 
@@ -169,34 +159,6 @@ export default function RegisterView() {
                   </Typography>
                 }
               />
-
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    className="w-full px-[2rem] py-[0.875rem]"
-                    child={
-                      <div className="flex items-center gap-3 justify-center">
-                        <GoogleSVG className="w-5 h-5" />
-                        <Typography level="base2sm" className="text-secondary">
-                          Sign up with Google
-                        </Typography>
-                      </div>
-                    }
-                  />
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>200Lab</AlertDialogTitle>
-                  </AlertDialogHeader>
-                  <AlertDialogDescription>
-                    Hiện tại tính năng này chưa được hỗ trợ
-                  </AlertDialogDescription>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Đóng</AlertDialogCancel>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
 
               <Typography
                 level="captionr"

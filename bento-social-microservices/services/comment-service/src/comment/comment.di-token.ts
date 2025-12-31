@@ -1,0 +1,3 @@
+export const COMMENT_SERVICE = Symbol('COMMENT_SERVICE');
+export const COMMENT_REPOSITORY = Symbol('COMMENT_REPOSITORY');
+

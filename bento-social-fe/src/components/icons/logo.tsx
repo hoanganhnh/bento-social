@@ -5,7 +5,7 @@ import Image from 'next/image';
 export default function Logo({ className }: { className?: string }) {
   return (
     <Image
-      src={'/img/logo_200lab.png'}
+      src={'/img/logo_ptit.png'}
       width={200}
       height={200}
       alt="logo"

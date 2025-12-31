@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@generated/topic-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Topic {
+  id        String      @id @map("id") @db.VarChar(36)
+  name      String      @unique @map("name") @db.VarChar(100)
+  color     String      @map("color") @db.VarChar(20)
+  postCount Int         @default(0) @map("post_count") @db.Integer
+  status    TopicStatus @default(active) @map("status")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt DateTime    @default(now()) @map("updated_at") @db.Timestamp(0)
+
+  @@index([status], map: "status")
+  @@index([name], map: "name")
+  @@map("topics")
+}
+
+enum TopicStatus {
+  active
+  inactive
+  deleted
+}
+

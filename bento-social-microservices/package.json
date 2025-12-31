@@ -1,0 +1,48 @@
+{
+  "name": "bento-social-microservices",
+  "version": "1.0.0",
+  "description": "Bento Social - Microservices Architecture",
+  "private": true,
+  "scripts": {
+    "install:all": "./scripts/install-all.sh",
+    "build": "pnpm -r build",
+    "build:shared": "pnpm --filter @bento/shared build",
+    "dev:gateway": "pnpm --filter api-gateway start:dev",
+    "dev:auth": "pnpm --filter auth-service start:dev",
+    "dev:user": "pnpm --filter user-service start:dev",
+    "dev:post": "pnpm --filter post-service start:dev",
+    "dev:topic": "pnpm --filter topic-service start:dev",
+    "dev:comment": "pnpm --filter comment-service start:dev",
+    "dev:notification": "pnpm --filter notification-service start:dev",
+    "dev:interaction": "pnpm --filter interaction-service start:dev",
+    "dev:upload": "pnpm --filter upload-service start:dev",
+    "start:all": "./scripts/start-all.sh",
+    "start:all:bg": "./scripts/start-all-detached.sh",
+    "start:all:tmux": "./scripts/start-all-tmux.sh",
+    "stop:all": "./scripts/stop-all.sh",
+    "logs": "./scripts/view-logs.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "keywords": [
+    "nestjs",
+    "microservices",
+    "social-network"
+  ],
+  "author": "Bento Team",
+  "license": "MIT",
+  "packageManager": "pnpm@9.12.2",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "@grpc/proto-loader": "^0.8.0",
+    "@nestjs/microservices": "^10.0.0",
+    "amqp-connection-manager": "^5.0.0",
+    "amqplib": "^0.10.9"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8"
+  }
+}

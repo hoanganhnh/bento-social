@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/@generated/interaction-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model PostLike {
+  postId    String   @map("post_id") @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  @@id([postId, userId])
+  @@index([userId], map: "post_like_user_idx")
+  @@map("post_likes")
+}
+
+model PostSave {
+  postId    String   @map("post_id") @db.VarChar(36)
+  userId    String   @map("user_id") @db.VarChar(36)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  @@id([postId, userId])
+  @@index([userId], map: "post_save_user_idx")
+  @@map("post_saves")
+}
+
+model Follower {
+  followerId  String   @map("follower_id") @db.VarChar(36)
+  followingId String   @map("following_id") @db.VarChar(36)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  @@id([followingId, followerId])
+  @@index([followerId], map: "follower_idx")
+  @@map("followers")
+}
+
