@@ -4,6 +4,7 @@
   "description": "Bento Social - Microservices Architecture",
   "private": true,
   "scripts": {
+    "install:all": "./scripts/install-all.sh",
     "build": "pnpm -r build",
     "build:shared": "pnpm --filter @bento/shared build",
     "dev:gateway": "pnpm --filter api-gateway start:dev",

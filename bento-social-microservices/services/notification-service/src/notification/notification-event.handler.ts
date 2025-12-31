@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from "@nestjs/common";
 import {
   RedisClient,
   EvtPostLiked,
@@ -9,17 +9,21 @@ import {
   PostCommentedEvent,
   IPostRpc,
   IAuthorRpc,
-} from '@bento/shared';
-import { NOTI_SERVICE, POST_RPC, USER_RPC } from './notification.di-token';
-import { NotificationAction, NotificationCreateDTO } from './notification.model';
-import { INotificationService } from './notification.port';
+} from "@bento/shared";
+import { NOTI_SERVICE, POST_RPC, USER_RPC } from "./notification.di-token";
+import {
+  NotificationAction,
+  NotificationCreateDTO,
+} from "./notification.model";
+import { INotificationService } from "./notification.port";
 
 @Injectable()
 export class NotificationEventHandler implements OnModuleInit {
   private readonly logger = new Logger(NotificationEventHandler.name);
 
   constructor(
-    @Inject(NOTI_SERVICE) private readonly notificationService: INotificationService,
+    @Inject(NOTI_SERVICE)
+    private readonly notificationService: INotificationService,
     @Inject(POST_RPC) private readonly postRpc: IPostRpc,
     @Inject(USER_RPC) private readonly userRpc: IAuthorRpc,
   ) {}
@@ -30,7 +34,7 @@ export class NotificationEventHandler implements OnModuleInit {
 
   private async subscribeToEvents() {
     if (!RedisClient.isInitialized()) {
-      this.logger.warn('Redis not initialized, skipping event subscriptions');
+      this.logger.warn("Redis not initialized, skipping event subscriptions");
       return;
     }
 
@@ -72,7 +76,7 @@ export class NotificationEventHandler implements OnModuleInit {
       }
     });
 
-    this.logger.log('Subscribed to PostLiked, Followed, PostCommented events');
+    this.logger.log("Subscribed to PostLiked, Followed, PostCommented events");
   }
 
   private async handlePostLiked(event: PostLikedEvent): Promise<void> {
@@ -127,20 +131,36 @@ export class NotificationEventHandler implements OnModuleInit {
   }
 
   private async handlePostCommented(event: PostCommentedEvent): Promise<void> {
-    const { authorIdOfParentComment } = event.payload;
+    const { authorIdOfParentComment, postId } = event.payload; // Extract postId
     const actorId = event.senderId!;
-
-    // Only notify for replies (when there's a parent comment author)
-    if (!authorIdOfParentComment) return;
-
-    // Don't notify self
-    if (actorId === authorIdOfParentComment) return;
 
     const actor = await this.userRpc.findById(actorId);
     if (!actor) {
       this.logger.warn(`User ${actorId} not found`);
       return;
     }
+
+    // 1. Notify Post Author
+    const post = await this.postRpc.findById(postId);
+    if (post && post.authorId !== actorId) {
+      // Avoid duplicate notification if post author is same as parent comment author (handled below)
+      if (post.authorId !== authorIdOfParentComment) {
+        const dto: NotificationCreateDTO = {
+          receiverId: post.authorId,
+          actorId,
+          content: `${actor.firstName} ${actor.lastName} commented on your post`,
+          action: NotificationAction.COMMENTED,
+        };
+        await this.notificationService.create(dto);
+      }
+    }
+
+    // 2. Notify Parent Comment Author (if reply)
+    // Only notify for replies (when there's a parent comment author)
+    if (!authorIdOfParentComment) return;
+
+    // Don't notify self
+    if (actorId === authorIdOfParentComment) return;
 
     const dto: NotificationCreateDTO = {
       receiverId: authorIdOfParentComment,
@@ -150,7 +170,8 @@ export class NotificationEventHandler implements OnModuleInit {
     };
 
     await this.notificationService.create(dto);
-    this.logger.debug(`Created notification for PostCommented: ${authorIdOfParentComment}`);
+    this.logger.debug(
+      `Created notification for PostCommented: ${authorIdOfParentComment}`,
+    );
   }
 }
-

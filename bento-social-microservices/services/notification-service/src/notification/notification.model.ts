@@ -1,10 +1,11 @@
-import { PublicUser } from '@bento/shared';
-import z from 'zod';
+import { PublicUser } from "@bento/shared";
+import z from "zod";
 
 export enum NotificationAction {
-  LIKED = 'liked',
-  FOLLOWED = 'followed',
-  REPLIED = 'replied',
+  LIKED = "liked",
+  FOLLOWED = "followed",
+  REPLIED = "replied",
+  COMMENTED = "commented",
 }
 
 export const notificationSchema = z.object({
@@ -19,7 +20,9 @@ export const notificationSchema = z.object({
   updatedAt: z.date().default(() => new Date()),
 });
 
-export type Notification = z.infer<typeof notificationSchema> & { sender?: PublicUser };
+export type Notification = z.infer<typeof notificationSchema> & {
+  sender?: PublicUser;
+};
 
 export const notificationCreateDTOSchema = notificationSchema
   .pick({
@@ -49,4 +52,3 @@ export const notificationCondSchema = notificationSchema
   .partial();
 
 export type NotificationCondition = z.infer<typeof notificationCondSchema>;
-

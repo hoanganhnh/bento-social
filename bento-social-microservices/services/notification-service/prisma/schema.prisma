@@ -26,5 +26,6 @@ enum NotificationAction {
   liked
   followed
   replied
+  commented
 }
 
